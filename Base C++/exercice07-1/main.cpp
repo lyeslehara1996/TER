@@ -15,8 +15,8 @@ return x * y ;
 }
 
 
-template <typename T> 
-T sustraction(T x, T y) 
+template <typename T , typename U> 
+auto sustraction(T x, U y) 
 {
 return x - y ;
 }
