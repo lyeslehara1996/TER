@@ -8,7 +8,7 @@ using namespace std;
 int main(){
     
     
-    std::cout << "l'année derniere les eleves ont eu a peu pres 14 et 15 en TER \n";
+    std::cout << "hello word \n";
 
     return 0;
 }
