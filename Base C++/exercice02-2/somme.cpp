@@ -1,8 +1,15 @@
-float somme(int a , float b){
+#include <iostream>
+#include "somme.h"
 
-float somme = a + b;
+void saisie(int &a, int &b) {
+    std::cout << "Donner deux valeurs a et b :" << std::endl;
+    std::cin >> a >> b;
+}
 
-return somme;
+float somme(int a, int b) {
+    return a + b;
+}
 
-
+void affichage(float s) {
+    std::cout << "La somme des deux nombres a et b est : " << s << std::endl;
 }

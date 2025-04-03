@@ -1,6 +1,8 @@
-#ifndef SOMME_H  
-#define SOMME_H 
+#ifndef SOMME_H
+#define SOMME_H
 
-float somme(int,float);
+void saisie(int &a, int &b);
+float somme(int a, int b);
+void affichage(float s);
 
-#endif
+#endif // SOMME_H
