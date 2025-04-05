@@ -1,0 +1,85 @@
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <algorithm>
+#include <cstdint>
+
+namespace v1_0 {
+
+// Allocation d'une image générique
+template <typename T>
+std::vector<T> allocateImage(size_t width, size_t height) {
+    return std::vector<T>(width * height);
+}
+
+// Création d'une image blanche
+template <typename T>
+std::vector<T> createWhiteImage(size_t width, size_t height, T maxValue) {
+    return std::vector<T>(width * height, maxValue);
+}
+
+// Création d'une mire sinusoïdale
+std::vector<float> createSinePattern(size_t width, size_t height, float frequency) {
+    std::vector<float> image = allocateImage<float>(width, height);
+    for (size_t y = 0; y < height; ++y) {
+        for (size_t x = 0; x < width; ++x) {
+            image[y * width + x] = 127.5f * (1 + sin(2 * M_PI * frequency * x / width));
+        }
+    }
+    return image;
+}
+
+// Création d'un damier
+template <typename T>
+std::vector<T> createCheckerboard(size_t width, size_t height, size_t squareSize, T color1, T color2) {
+    std::vector<T> image = allocateImage<T>(width, height);
+    for (size_t y = 0; y < height; ++y) {
+        for (size_t x = 0; x < width; ++x) {
+            bool isWhite = ((x / squareSize) % 2) == ((y / squareSize) % 2);
+            image[y * width + x] = isWhite ? color1 : color2;
+        }
+    }
+    return image;
+}
+
+// Lecture d'une image RAW
+std::vector<uint8_t> readRawImage(const std::string& filename, size_t width, size_t height) {
+    std::vector<uint8_t> image(width * height);
+    std::ifstream file(filename, std::ios::binary);
+    if (file) {
+        file.read(reinterpret_cast<char*>(image.data()), image.size());
+    }
+    return image;
+}
+
+// Écriture d'une image RAW
+void writeRawImage(const std::string& filename, const std::vector<uint8_t>& image) {
+    std::ofstream file(filename, std::ios::binary);
+    if (file) {
+        file.write(reinterpret_cast<const char*>(image.data()), image.size());
+    }
+}
+
+// Conversion d'une image d'un type à un autre
+template <typename InType, typename OutType>
+std::vector<OutType> convertImage(const std::vector<InType>& inputImage, InType inMax, OutType outMax) {
+    std::vector<OutType> outputImage(inputImage.size());
+    for (size_t i = 0; i < inputImage.size(); ++i) {
+        outputImage[i] = static_cast<OutType>((inputImage[i] / static_cast<float>(inMax)) * outMax);
+    }
+    return outputImage;
+}
+
+} // namespace v1_0
+
+// Test des fonctionnalités
+int main() {
+    size_t width = 256, height = 256;
+    auto imgWhite = v1_0::createWhiteImage<uint8_t>(width, height, 255);
+    auto imgSine = v1_0::createSinePattern(width, height, 10);
+    auto imgChecker = v1_0::createCheckerboard<uint8_t>(width, height, 32, 255, 0);
+    
+    std::cout << "Images générées avec succès!" << std::endl;
+    return 0;
+}
