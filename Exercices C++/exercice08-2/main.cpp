@@ -42,9 +42,7 @@ void afficherTableauTemplate(const std::vector<T>& array) {
     std::cout << std::endl;
 }
 
-
 int main(){
-    std::srand(std::time(nullptr));
     int size ;
     std::cout<<"donner la tailler a allouer au tableau vector \n";
     std::cin>> size;
