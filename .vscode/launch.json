@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": ".",
-      "program": "build/Debug/outDebug",
+      "cwd": "c:/Users/lylehara/Downloads/TER/Exercices C++/exercice09-5",
+      "program": "c:/Users/lylehara/Downloads/TER/Exercices C++/exercice09-5/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
