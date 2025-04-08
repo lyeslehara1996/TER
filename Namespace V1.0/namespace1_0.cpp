@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <iomanip>
 namespace v1_0 {
-    using Image2D = std::vector<std::vector<uint8_t>>;
+    // using Image2D = std::vector<std::vector<uint8_t>>;
 
 //allocation de memoire pour une image 2D  pour un seul vecteur 
 
@@ -23,17 +23,17 @@ des images avec des dimensions variables ou irrégulières, au prix d'une utilis
 
 En général, pour des raisons de performance et d'efficacité, il est recommandé d'utiliser un seul std::vector pour représenter une image 2D.
 */
-Image2D allocateImage(size_t width, size_t height) {
-    return Image2D(height, std::vector<uint8_t>(width, 0));
-}
+// Image2D allocateImage(size_t width, size_t height) {
+//     return Image2D(height, std::vector<uint8_t>(width, 0));
+// }
 
 //creation d une image blanche 
 // la methode fill sert a remplir tout les element de vecteur avec d un nombre ici 255 pour creer une image blanche 
 
-void createWhiteImage(Image2D& image) {
-    for (auto& row : image) {
-        std::fill(row.begin(), row.end(), 255);
-    }}
+// void createWhiteImage(Image2D& image) {
+//     for (auto& row : image) {
+//         std::fill(row.begin(), row.end(), 255);
+//     }}
 
 //en utilisant template avec un type génerique 
 template <typename T>
@@ -108,33 +108,51 @@ void createCheckerboardImage(std::vector<uint8_t>& image, size_t width, size_t h
     }
 }
 
- // Lecture d'un fichier .raw (8 bits par pixel)
- std::vector<uint8_t> readRawImage8(const std::string& filename, size_t width, size_t height) {
+
+
+
+// Lecture .raw 16 bits avec gestion endianness
+std::vector<uint16_t> readRawImage16(const std::string& filename, size_t width, size_t height, bool bigEndian = false) {
     std::ifstream ifs(filename, std::ios::binary);
-    std::vector<uint8_t> image(width * height);
+    std::vector<uint16_t> image(width * height);
 
     if (!ifs) {
-        std::cerr << "Erreur lors de l'ouverture du fichier RAW pour lecture.\n";
+        std::cerr << "Erreur lors de l'ouverture du fichier RAW 16 bits.\n";
         return image;
     }
 
-    ifs.read(reinterpret_cast<char*>(image.data()), image.size());
+    for (size_t i = 0; i < image.size(); ++i) {
+        uint8_t bytes[2];
+        ifs.read(reinterpret_cast<char*>(bytes), 2);
+        if (bigEndian)
+            image[i] = (static_cast<uint16_t>(bytes[0]) << 8) | bytes[1];  // MSB first
+        else
+            image[i] = (static_cast<uint16_t>(bytes[1]) << 8) | bytes[0];  // LSB first
+    }
+
     return image;
 }
 
-
-// Écriture d'un fichier .raw (8 bits par pixel)
-void writeRawImage8(const std::vector<uint8_t>& image, const std::string& filename) {
+// Écriture .raw 16 bits avec gestion endianness
+void writeRawImage16(const std::vector<uint16_t>& image, const std::string& filename, bool bigEndian = false) {
     std::ofstream ofs(filename, std::ios::binary);
-
     if (!ofs) {
-        std::cerr << "Erreur lors de l'ouverture du fichier RAW pour écriture.\n";
+        std::cerr << "Erreur écriture fichier RAW 16 bits.\n";
         return;
     }
 
-    ofs.write(reinterpret_cast<const char*>(image.data()), image.size());
+    for (uint16_t val : image) {
+        uint8_t bytes[2];
+        if (bigEndian) {
+            bytes[0] = val >> 8;
+            bytes[1] = val & 0xFF;
+        } else {
+            bytes[1] = val >> 8;
+            bytes[0] = val & 0xFF;
+        }
+        ofs.write(reinterpret_cast<char*>(bytes), 2);
+    }
 }
-
 
 // Conversion avec adaptation de dynamique (optionnelle)
 template <typename SrcType, typename DstType>
