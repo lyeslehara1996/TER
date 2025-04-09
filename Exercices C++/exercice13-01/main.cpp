@@ -12,10 +12,7 @@ int main() {
         new Cercle{Point{4, 5, 6}, 3}
     };
 
-    // Affichage des formes
-    for (const auto* f : v) {
-        std::cout << *f << '\n';
-    }
+    
 
     std::cout << "Le plus grand rayon est : " << getPlusGrandRayon(v) << '\n';
 
