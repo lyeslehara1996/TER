@@ -4,6 +4,29 @@
 #include <iomanip>
 #include <string>
 
+
+/*allocation de l image 2D avec une ligge qui est un vecteur  (vecteur de vecteur )
+
+Cette méthode crée un vecteur de vecteurs, chaque vecteur interne représentant une ligne de l'image
+Utilisez un std::vector de std::vector si vous avez besoin d'une structure plus flexible, capable de gérer
+des images avec des dimensions variables ou irrégulières, au prix d'une utilisation mémoire potentiellement plus élevée.
+
+En général, pour des raisons de performance et d'efficacité, il est recommandé d'utiliser un seul std::vector pour représenter une image 2D.
+*/
+// Image2D allocateImage(size_t width, size_t height) {
+//     return Image2D(height, std::vector<uint8_t>(width, 0));
+// }
+
+//creation d une image blanche 
+// la methode fill sert a remplir tout les element de vecteur avec d un nombre ici 255 pour creer une image blanche 
+
+// void createWhiteImage(Image2D& image) {
+//     for (auto& row : image) {
+//         std::fill(row.begin(), row.end(), 255);
+//     }}
+
+//en utilisant template avec un type génerique 
+
 // Alias pour une image 2D en niveaux de gris
 using Image2D = std::vector<std::vector<T>>;
 
