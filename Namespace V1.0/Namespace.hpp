@@ -8,7 +8,7 @@
 #include <type_traits>
 
 namespace v1_0 {
-
+using namespace v1_0;
 template <typename T>
 std::vector<T> allocationImage(size_t width, size_t height) {
     return std::vector<T>(width * height);
@@ -77,26 +77,38 @@ std::vector<T> createCheckerboardImage(size_t width, size_t height, size_t squar
 
 
 
-std::vector<uint8_t> readRawImage8(const std::string& filename, size_t width, size_t height) {
+template <typename T>
+std::vector<T> readRawImage8bit(const std::string& filename, size_t width, size_t height) {
     std::ifstream ifs(filename, std::ios::binary);
-    std::vector<uint8_t> image(width * height);
+    std::vector<T> image(width * height);
+
     if (!ifs) {
-        std::cerr << "Erreur ouverture fichier RAW 8 bits.\n";
+        std::cerr << "Erreur ouverture fichier RAW.\n";
         return image;
     }
-    ifs.read(reinterpret_cast<char*>(image.data()), image.size());
+
+    ifs.read(reinterpret_cast<char*>(image.data()), image.size() * sizeof(T));
+
+    if (!ifs) {
+        std::cerr << "Erreur lors de la lecture du fichier.\n";
+    }
+
     return image;
 }
 
-void writeRawImage8(const std::vector<uint8_t>& image, const std::string& filename) {
+void writePGMImage8(const std::vector<uint8_t>& image, const std::string& filename, int width, int height) {
     std::ofstream ofs(filename, std::ios::binary);
     if (!ofs) {
-        std::cerr << "Erreur écriture fichier RAW 8 bits.\n";
+        std::cerr << "Erreur d'écriture fichier PGM.\n";
         return;
     }
+
+    // Écriture du header PGM (P5 = format binaire)
+    ofs << "P5\n" << width << " " << height << "\n255\n";
+
+    // Écriture des pixels en binaire
     ofs.write(reinterpret_cast<const char*>(image.data()), image.size());
 }
-
 
 std::vector<uint16_t> readRawImage16(const std::string& filename, size_t width, size_t height, bool fileIsBigEndian) {
     std::ifstream ifs(filename, std::ios::binary);
@@ -125,17 +137,19 @@ std::vector<uint16_t> readRawImage16(const std::string& filename, size_t width, 
 }
 
 
+// Conversion avec adaptation de dynamique (optionnelle)
 template <typename SrcType, typename DstType>
 std::vector<DstType> convertImage(const std::vector<SrcType>& input, SrcType srcMax, DstType dstMax) {
     std::vector<DstType> output(input.size());
+
     for (size_t i = 0; i < input.size(); ++i) {
+        // Normalisation et conversion
         float normalized = static_cast<float>(input[i]) / static_cast<float>(srcMax);
         output[i] = static_cast<DstType>(normalized * dstMax);
     }
+
     return output;
 }
-
-
 
 std::vector<uint8_t> loadLUTBinary(const std::string& filename) {
     std::vector<uint8_t> lut(256 * 3);
