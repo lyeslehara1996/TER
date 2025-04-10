@@ -2,9 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <algorithm>
 #include <cstdint>
-#include <iomanip>
 #include <type_traits>
 
 namespace v1_0 {
