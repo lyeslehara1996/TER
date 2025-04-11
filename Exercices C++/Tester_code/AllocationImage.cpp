@@ -1,8 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
-#include <cmath>
-#include <algorithm>
+#include <iomanip> 
 #include <cstdint>
 
 namespace v1_0 {
@@ -44,5 +43,8 @@ int main() {
     std::cout << "Images générées avec succès!" << std::endl;
 
     v1_0::savePGM(imgWhite, width, height, "white_image.pgm");
+    auto imgallocation = v1_0::allocateImage<uint8_t>(width, height);
+   v1_0::printImage(imgWhite, 255, 255);
+
     return 0;
 }
