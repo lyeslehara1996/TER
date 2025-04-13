@@ -88,10 +88,20 @@ namespace v1_0 {
         }
         return imageRGB;
     }
-    void savePPM(const std::vector<uint8_t>& imageRGB, size_t width, size_t height, const std::string& filename) {
-        std::ofstream ofs(filename, std::ios::binary);
-        ofs << "P6\n" << width << " " << height << "\n255\n";
-        ofs.write(reinterpret_cast<const char*>(imageRGB.data()), imageRGB.size());
+    void savePPM(const std::vector<unsigned char>& image, int width, int height, const std::string& filename) {
+        std::ofstream file(filename, std::ios::binary);
+        if (!file) {
+            std::cerr << "Erreur : impossible de créer le fichier " << filename << std::endl;
+            return;
+        }
+    
+        // Écrire l'en-tête du fichier PPM
+        file << "P6\n" << width << " " << height << "\n255\n";
+    
+        // Écrire les données de l'image (R, G, B)
+        file.write(reinterpret_cast<const char*>(image.data()), width * height * 3);
+    
+        file.close();
     }
 
     void printImage(const std::vector<uint8_t>& image, size_t width, size_t height) {
