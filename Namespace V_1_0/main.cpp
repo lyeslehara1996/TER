@@ -42,10 +42,11 @@ int main(){
        auto imageBE = readRawImage<uint16_t>("C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\IRM_16_bits_256x256_coeur.raw", 256, 256, true); // Big Endian
       // savePGM(imageBE, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\XR_8_bits_512x512_coeur_BE.pgm");
       
-      auto image_craneLE = readRawImageRGB<uint8_t>("C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\IRM_RGB_8_bits_256x256_crane.raw", 256, 256, 3,false); // Big Endian
-      auto image_craneBE = readRawImageRGB<uint8_t>("C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\IRM_RGB_8_bits_256x256_crane.raw", 256, 256, 3,true); // Big Endian
-     savePGM(image_craneLE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\IRM_RGB_8_bits_256x256_crane._BE.pgm");
-     savePGM(image_craneBE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\IRM_RGB_8_bits_256x256_crane._Bl.pgm");
+      auto image_craneLE = readRawImageWithChannels<uint8_t>(R"(C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\IRM_RGB_8_bits_256x256_crane.raw)", 256, 256, 3 ,false); // Big Endian
+      auto image_craneBE = readRawImageWithChannels<uint8_t>(R"(C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\IRM_RGB_8_bits_256x256_crane.raw)", 256, 256, 3 ,true); // Big Endian
+    
+          savePPM(image_craneLE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\IRM_RGB_8_bits_256x256_crane_BE.pgm");
+       savePPM(image_craneBE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\IRM_RGB_8_bits_256x256_crane_Bl.pgm");
       
      
      auto converted = convertImage<uint16_t, uint8_t>(sinusImage, true);

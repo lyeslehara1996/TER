@@ -199,71 +199,37 @@ std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjust
     return convertedImage;
 }
 
-
 template <typename T>
-std::vector<T> readRawImage3C(const std::string& filename, int width, int height, int channels = 3, bool littleEndian = true) {
-    size_t expectedSize = static_cast<size_t>(width) * height * channels * sizeof(T);
-    std::vector<T> image(expectedSize / sizeof(T));
+std::vector<T> readRawImageWithChannels(const std::string& filename, size_t width, size_t height, size_t channels, bool bigEndian = false) {
+    static_assert(std::is_integral<T>::value, "T doit être un type entier");
+    std::ifstream testFile(filename);
+    if (!testFile) {
+        std::cerr << "Le fichier n'existe pas ou le chemin est incorrect : " << filename << '\n';
+    }
+    
+    std::ifstream ifs(filename, std::ios::binary);
+    std::vector<T> image(width * height * channels);
 
-    std::ifstream file(filename, std::ios::binary);
-    if (!file) {
-        throw std::runtime_error("readRawImage: Failed to open file.");
+    if (!ifs) {
+        std::cerr << "Erreur ouverture RAW " << sizeof(T) * 8 << " bits.\n";
+        return image;
     }
 
-    file.read(reinterpret_cast<char*>(image.data()), expectedSize);
-    if (file.gcount() != static_cast<std::streamsize>(expectedSize)) {
-        throw std::runtime_error("readRawImage: File size doesn't match expected dimensions.");
-    }
-
-    if (!littleEndian) {
-        // Si l'ordre des octets est big-endian, inverser les octets de chaque pixel (supposé être de type T)
-        for (auto& pixel : image) {
-            // Supposons que T est un type à plusieurs octets (comme uint16_t, uint32_t, float, etc.)
-            char* pixelBytes = reinterpret_cast<char*>(&pixel);
-            std::reverse(pixelBytes, pixelBytes + sizeof(T));  // Inverser l'ordre des octets
-        }
-    }
-
-    return image;
-}
-
-
-template<typename T>
-std::vector<T> readRawImageRGB(const std::string& filename, size_t width, size_t height, 
-                                size_t channels = 3, bool bigEndian = false) {
-    static_assert(std::is_integral<T>::value || std::is_floating_point<T>::value,
-                  "T doit être un type numérique.");
-
-    const size_t numValues = width * height * channels;
-    const size_t expectedBytes = numValues * sizeof(T);
-
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
-    if (!file) {
-        throw std::runtime_error("Erreur : impossible d'ouvrir le fichier RAW.");
-    }
-
-    std::streamsize fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    if (fileSize != static_cast<std::streamsize>(expectedBytes)) {
-        throw std::runtime_error("Erreur : taille du fichier incohérente avec les dimensions et les canaux.");
-    }
-
-    std::vector<T> image(numValues);
-
-    if (bigEndian && sizeof(T) > 1) {
-        for (size_t i = 0; i < numValues; ++i) {
-            uint8_t bytes[sizeof(T)];
-            file.read(reinterpret_cast<char*>(bytes), sizeof(T));
-            T value = 0;
+    for (size_t i = 0; i < image.size(); ++i) {
+        uint8_t bytes[sizeof(T)];
+        ifs.read(reinterpret_cast<char*>(bytes), sizeof(T));
+        T value = 0;
+        if (bigEndian) {
             for (size_t b = 0; b < sizeof(T); ++b)
                 value = (value << 8) | bytes[b];
-            image[i] = value;
+        } else {
+            for (size_t b = 0; b < sizeof(T); ++b)
+                value |= (static_cast<T>(bytes[b]) << (8 * b));
         }
-    } else {
-        file.read(reinterpret_cast<char*>(image.data()), expectedBytes);
+        image[i] = value;
     }
 
     return image;
 }
+
 }
