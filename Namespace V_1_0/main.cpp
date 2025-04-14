@@ -92,6 +92,9 @@ int main(){
     savePPM(image_craneBE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\IRM_RGB_8_bits_256x256_crane_BE.ppm");
     savePPM(image_craneLE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\IRM_RGB_8_bits_256x256_crane_LE.ppm");
     
+    auto image_crane_gray = convertRGBToGrayscale(image_craneBE, 256, 256);
+
+
 
     // 3. Lecture de fichiers RAW (16 bits)
       auto imageIRM__coeur_BE = readRawImage<uint16_t>("C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\IRM_16_bits_256x256_coeur.raw", 256, 256, false); // Little Endian
@@ -145,6 +148,7 @@ int main(){
        savePGM(imageTDM__crane_BE_converted, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\imageTDM__crane_BE_converted.pgm");
        savePGM(imageTDM__crane_LE_converted, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\imageTDM__crane_LE_converted.pgm");
 
+       
        //changement de la dynamique de lUT
 
         auto lut1 = loadLUTBinary("C:\\Users\\lylehara\\Downloads\\TER\\LUT\\LUT\\000-gray.lut");
@@ -320,7 +324,7 @@ int main(){
          auto lut179 = loadLUTBinary("C:\\Users\\lylehara\\Downloads\\TER\\LUT\\LUT\\NucMed_Image_LUTs\\Yellow_WFG.lut");
 
    
-      
+    
       //  // 4. Application de la LUT sur les images
       // image 1 => imageXR__femoral_BE
 
@@ -1369,179 +1373,179 @@ int main(){
      savePPM(imageIRM__coeur_LE_converted_169, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageIRM__coeur_LE_converted_colored\\imageIRM__coeur_LE_converted_colored_169.ppm");
      savePPM(imageIRM__coeur_LE_converted_170, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageIRM__coeur_LE_converted_colored\\imageIRM__coeur_LE_converted_colored_170.ppm");
      savePPM(imageIRM__coeur_LE_converted_171, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageIRM__coeur_LE_converted_colored\\imageIRM__coeur_LE_converted_colored_171.ppm");
-     
+
      //image 4 => image_craneBE
-     auto image_craneLE_colored_1 = applyLUT(image_craneLE, lut1);
-     auto image_craneLE_colored_2 = applyLUT(image_craneLE, lut2);
-     auto image_craneLE_colored_3 = applyLUT(image_craneLE, lut3);
-     auto image_craneLE_colored_4 = applyLUT(image_craneLE, lut4);
-     auto image_craneLE_colored_5 = applyLUT(image_craneLE, lut5);
-     auto image_craneLE_colored_6 = applyLUT(image_craneLE, lut6);
-     auto image_craneLE_colored_7 = applyLUT(image_craneLE, lut7);
-     auto image_craneLE_colored_8 = applyLUT(image_craneLE, lut8);
-     auto image_craneLE_colored_9 = applyLUT(image_craneLE, lut9);
-     auto image_craneLE_colored_10 = applyLUT(image_craneLE, lut11);
-     auto image_craneLE_colored_11 = applyLUT(image_craneLE, lut12);
-     auto image_craneLE_colored_12 = applyLUT(image_craneLE, lut13);
-     auto image_craneLE_colored_13 = applyLUT(image_craneLE, lut14);
-     auto image_craneLE_colored_14 = applyLUT(image_craneLE, lut15);
-     auto image_craneLE_colored_15 = applyLUT(image_craneLE, lut16);
-     auto image_craneLE_colored_16 = applyLUT(image_craneLE, lut17);
-     auto image_craneLE_colored_17 = applyLUT(image_craneLE, lut18);
-     auto image_craneLE_colored_18 = applyLUT(image_craneLE, lut19);
-     auto image_craneLE_colored_19 = applyLUT(image_craneLE, lut21);
-     auto image_craneLE_colored_20 = applyLUT(image_craneLE, lut22);
-     auto image_craneLE_colored_21 = applyLUT(image_craneLE, lut23);
-     auto image_craneLE_colored_22 = applyLUT(image_craneLE, lut24);
-     auto image_craneLE_colored_23 = applyLUT(image_craneLE, lut25);
-     auto image_craneLE_colored_24 = applyLUT(image_craneLE, lut26);
-     auto image_craneLE_colored_25 = applyLUT(image_craneLE, lut27);
-     auto image_craneLE_colored_26 = applyLUT(image_craneLE, lut28);
-     auto image_craneLE_colored_27 = applyLUT(image_craneLE, lut29);
-     auto image_craneLE_colored_28 = applyLUT(image_craneLE, lut31);
-     auto image_craneLE_colored_29 = applyLUT(image_craneLE, lut32);
-     auto image_craneLE_colored_30 = applyLUT(image_craneLE, lut33);
-     auto image_craneLE_colored_31 = applyLUT(image_craneLE, lut34);
-     auto image_craneLE_colored_32 = applyLUT(image_craneLE, lut35);
-     auto image_craneLE_colored_33 = applyLUT(image_craneLE, lut36);
-     auto image_craneLE_colored_34 = applyLUT(image_craneLE, lut37);
-     auto image_craneLE_colored_35 = applyLUT(image_craneLE, lut38);
-     auto image_craneLE_colored_36 = applyLUT(image_craneLE, lut39);
-     auto image_craneLE_colored_37 = applyLUT(image_craneLE, lut41);
-     auto image_craneLE_colored_38 = applyLUT(image_craneLE, lut42);
-     auto image_craneLE_colored_39 = applyLUT(image_craneLE, lut43);
-     auto image_craneLE_colored_40 = applyLUT(image_craneLE, lut44);
-     auto image_craneLE_colored_41 = applyLUT(image_craneLE, lut45);
-     auto image_craneLE_colored_42 = applyLUT(image_craneLE, lut46);
-     auto image_craneLE_colored_43 = applyLUT(image_craneLE, lut47);
-     auto image_craneLE_colored_44 = applyLUT(image_craneLE, lut48);
-     auto image_craneLE_colored_45 = applyLUT(image_craneLE, lut49);
-     auto image_craneLE_colored_46 = applyLUT(image_craneLE, lut51);
-     auto image_craneLE_colored_47 = applyLUT(image_craneLE, lut52);
-     auto image_craneLE_colored_48 = applyLUT(image_craneLE, lut53);
-     auto image_craneLE_colored_49 = applyLUT(image_craneLE, lut54);
-     auto image_craneLE_colored_50 = applyLUT(image_craneLE, lut55);
-     auto image_craneLE_colored_51 = applyLUT(image_craneLE, lut56);
-     auto image_craneLE_colored_52 = applyLUT(image_craneLE, lut57);
-     auto image_craneLE_colored_53 = applyLUT(image_craneLE, lut58);
-     auto image_craneLE_colored_54 = applyLUT(image_craneLE, lut59);
-     auto image_craneLE_colored_55 = applyLUT(image_craneLE, lut61);
-     auto image_craneLE_colored_56 = applyLUT(image_craneLE, lut62);
-     auto image_craneLE_colored_57 = applyLUT(image_craneLE, lut63);
-     auto image_craneLE_colored_58 = applyLUT(image_craneLE, lut64);
-     auto image_craneLE_colored_59 = applyLUT(image_craneLE, lut65);
-     auto image_craneLE_colored_60 = applyLUT(image_craneLE, lut66);
-     auto image_craneLE_colored_61 = applyLUT(image_craneLE, lut67);
-     auto image_craneLE_colored_62 = applyLUT(image_craneLE, lut68);
-     auto image_craneLE_colored_63 = applyLUT(image_craneLE, lut69);
-     auto image_craneLE_colored_64 = applyLUT(image_craneLE, lut71);
-     auto image_craneLE_colored_65 = applyLUT(image_craneLE, lut72);
-     auto image_craneLE_colored_66 = applyLUT(image_craneLE, lut73);
-     auto image_craneLE_colored_67 = applyLUT(image_craneLE, lut74);
-     auto image_craneLE_colored_68 = applyLUT(image_craneLE, lut75);
-     auto image_craneLE_colored_69 = applyLUT(image_craneLE, lut76);
-     auto image_craneLE_colored_70 = applyLUT(image_craneLE, lut77);
-     auto image_craneLE_colored_71 = applyLUT(image_craneLE, lut78);
-     auto image_craneLE_colored_72 = applyLUT(image_craneLE, lut79);
-     auto image_craneLE_colored_73 = applyLUT(image_craneLE, lut81);
-     auto image_craneLE_colored_74 = applyLUT(image_craneLE, lut82);
-     auto image_craneLE_colored_75 = applyLUT(image_craneLE, lut83);
-     auto image_craneLE_colored_76 = applyLUT(image_craneLE, lut84);
-     auto image_craneLE_colored_77 = applyLUT(image_craneLE, lut85);
-     auto image_craneLE_colored_78 = applyLUT(image_craneLE, lut86);
-     auto image_craneLE_colored_79 = applyLUT(image_craneLE, lut87);
-     auto image_craneLE_colored_80 = applyLUT(image_craneLE, lut88);
-     auto image_craneLE_colored_81 = applyLUT(image_craneLE, lut89);
-     auto image_craneLE_colored_82 = applyLUT(image_craneLE, lut90);
-     auto image_craneLE_colored_83 = applyLUT(image_craneLE, lut91);
-     auto image_craneLE_colored_84 = applyLUT(image_craneLE, lut92);
-     auto image_craneLE_colored_85 = applyLUT(image_craneLE, lut93);
-     auto image_craneLE_colored_86 = applyLUT(image_craneLE, lut94);
-     auto image_craneLE_colored_87 = applyLUT(image_craneLE, lut95);
-     auto image_craneLE_colored_88 = applyLUT(image_craneLE, lut96);
-     auto image_craneLE_colored_89 = applyLUT(image_craneLE, lut97);
-     auto image_craneLE_colored_90 = applyLUT(image_craneLE, lut98);
-     auto image_craneLE_colored_91 = applyLUT(image_craneLE, lut99);
-     auto image_craneLE_colored_92 = applyLUT(image_craneLE, lut100);
-     auto image_craneLE_colored_93 = applyLUT(image_craneLE, lut101);
-     auto image_craneLE_colored_94 = applyLUT(image_craneLE, lut102);
-     auto image_craneLE_colored_95 = applyLUT(image_craneLE, lut103);
-     auto image_craneLE_colored_96 = applyLUT(image_craneLE, lut104);
-     auto image_craneLE_colored_97 = applyLUT(image_craneLE, lut105);
-     auto image_craneLE_colored_98 = applyLUT(image_craneLE, lut106);
-     auto image_craneLE_colored_99 = applyLUT(image_craneLE, lut107);
-     auto image_craneLE_colored_100 = applyLUT(image_craneLE, lut108);
-     auto image_craneLE_colored_101 = applyLUT(image_craneLE, lut109);
-     auto image_craneLE_colored_102 = applyLUT(image_craneLE, lut110);
-     auto image_craneLE_colored_103 = applyLUT(image_craneLE, lut111);
-     auto image_craneLE_colored_104 = applyLUT(image_craneLE, lut112);
-     auto image_craneLE_colored_105 = applyLUT(image_craneLE, lut113);
-     auto image_craneLE_colored_106 = applyLUT(image_craneLE, lut114);
-     auto image_craneLE_colored_107 = applyLUT(image_craneLE, lut115);
-     auto image_craneLE_colored_108 = applyLUT(image_craneLE, lut116);
-     auto image_craneLE_colored_109 = applyLUT(image_craneLE, lut117);
-     auto image_craneLE_colored_110 = applyLUT(image_craneLE, lut118);
-     auto image_craneLE_colored_111 = applyLUT(image_craneLE, lut119);
-     auto image_craneLE_colored_112 = applyLUT(image_craneLE, lut120);
-     auto image_craneLE_colored_113 = applyLUT(image_craneLE, lut121);
-     auto image_craneLE_colored_114 = applyLUT(image_craneLE, lut122);
-     auto image_craneLE_colored_115 = applyLUT(image_craneLE, lut123);
-     auto image_craneLE_colored_116 = applyLUT(image_craneLE, lut124);
-     auto image_craneLE_colored_117 = applyLUT(image_craneLE, lut125);
-     auto image_craneLE_colored_118 = applyLUT(image_craneLE, lut126);
-     auto image_craneLE_colored_119 = applyLUT(image_craneLE, lut127);
-     auto image_craneLE_colored_120 = applyLUT(image_craneLE, lut128);
-     auto image_craneLE_colored_121 = applyLUT(image_craneLE, lut129);
-     auto image_craneLE_colored_122 = applyLUT(image_craneLE, lut130);
-     auto image_craneLE_colored_123 = applyLUT(image_craneLE, lut131);
-     auto image_craneLE_colored_124 = applyLUT(image_craneLE, lut132);
-     auto image_craneLE_colored_125 = applyLUT(image_craneLE, lut133);
-     auto image_craneLE_colored_126 = applyLUT(image_craneLE, lut134);
-     auto image_craneLE_colored_127 = applyLUT(image_craneLE, lut135);
-     auto image_craneLE_colored_128 = applyLUT(image_craneLE, lut136);
-     auto image_craneLE_colored_129 = applyLUT(image_craneLE, lut137);
-     auto image_craneLE_colored_130 = applyLUT(image_craneLE, lut138);
-     auto image_craneLE_colored_131 = applyLUT(image_craneLE, lut139);
-     auto image_craneLE_colored_132 = applyLUT(image_craneLE, lut140);
-     auto image_craneLE_colored_133 = applyLUT(image_craneLE, lut141);
-     auto image_craneLE_colored_134 = applyLUT(image_craneLE, lut142);
-     auto image_craneLE_colored_135 = applyLUT(image_craneLE, lut143);
-     auto image_craneLE_colored_136 = applyLUT(image_craneLE, lut144);
-     auto image_craneLE_colored_137 = applyLUT(image_craneLE, lut145);
-     auto image_craneLE_colored_138 = applyLUT(image_craneLE, lut146);
-     auto image_craneLE_colored_139 = applyLUT(image_craneLE, lut147);
-     auto image_craneLE_colored_140 = applyLUT(image_craneLE, lut148);
-     auto image_craneLE_colored_141 = applyLUT(image_craneLE, lut149);
-     auto image_craneLE_colored_142 = applyLUT(image_craneLE, lut150);
-     auto image_craneLE_colored_143 = applyLUT(image_craneLE, lut151);
-     auto image_craneLE_colored_144 = applyLUT(image_craneLE, lut152);
-     auto image_craneLE_colored_145 = applyLUT(image_craneLE, lut153);
-     auto image_craneLE_colored_146 = applyLUT(image_craneLE, lut154);
-     auto image_craneLE_colored_147 = applyLUT(image_craneLE, lut155);
-     auto image_craneLE_colored_148 = applyLUT(image_craneLE, lut156);
-     auto image_craneLE_colored_149 = applyLUT(image_craneLE, lut157);
-     auto image_craneLE_colored_150 = applyLUT(image_craneLE, lut158);
-     auto image_craneLE_colored_151 = applyLUT(image_craneLE, lut159);
-     auto image_craneLE_colored_152 = applyLUT(image_craneLE, lut160);
-     auto image_craneLE_colored_153 = applyLUT(image_craneLE, lut161);
-     auto image_craneLE_colored_154 = applyLUT(image_craneLE, lut162);
-     auto image_craneLE_colored_155 = applyLUT(image_craneLE, lut163);
-     auto image_craneLE_colored_156 = applyLUT(image_craneLE, lut164);
-     auto image_craneLE_colored_157 = applyLUT(image_craneLE, lut165);
-     auto image_craneLE_colored_158 = applyLUT(image_craneLE, lut166);
-     auto image_craneLE_colored_159 = applyLUT(image_craneLE, lut167);
-     auto image_craneLE_colored_160 = applyLUT(image_craneLE, lut168);
-     auto image_craneLE_colored_161 = applyLUT(image_craneLE, lut169);
-     auto image_craneLE_colored_162 = applyLUT(image_craneLE, lut170);
-     auto image_craneLE_colored_163 = applyLUT(image_craneLE, lut171);
-     auto image_craneLE_colored_164 = applyLUT(image_craneLE, lut172);
-     auto image_craneLE_colored_165 = applyLUT(image_craneLE, lut173);
-     auto image_craneLE_colored_166 = applyLUT(image_craneLE, lut174);
-     auto image_craneLE_colored_167 = applyLUT(image_craneLE, lut175);
-     auto image_craneLE_colored_168 = applyLUT(image_craneLE, lut176);
-     auto image_craneLE_colored_169 = applyLUT(image_craneLE, lut177);
-     auto image_craneLE_colored_170 = applyLUT(image_craneLE, lut178);
-     auto image_craneLE_colored_171 = applyLUT(image_craneLE, lut179);
+     auto image_craneLE_colored_1 = applyFalseColor(image_crane_gray, lut1);
+     auto image_craneLE_colored_2 = applyFalseColor(image_crane_gray, lut2);
+     auto image_craneLE_colored_3 = applyFalseColor(image_crane_gray, lut3);
+     auto image_craneLE_colored_4 = applyFalseColor(image_crane_gray, lut4);
+     auto image_craneLE_colored_5 = applyFalseColor(image_crane_gray, lut5);
+     auto image_craneLE_colored_6 = applyFalseColor(image_crane_gray, lut6);
+     auto image_craneLE_colored_7 = applyFalseColor(image_crane_gray, lut7);
+     auto image_craneLE_colored_8 = applyFalseColor(image_crane_gray, lut8);
+     auto image_craneLE_colored_9 = applyFalseColor(image_crane_gray, lut9);
+     auto image_craneLE_colored_10 = applyFalseColor(image_crane_gray, lut11);
+     auto image_craneLE_colored_11 = applyFalseColor(image_crane_gray, lut12);
+     auto image_craneLE_colored_12 = applyFalseColor(image_crane_gray, lut13);
+     auto image_craneLE_colored_13 = applyFalseColor(image_crane_gray, lut14);
+     auto image_craneLE_colored_14 = applyFalseColor(image_crane_gray, lut15);
+     auto image_craneLE_colored_15 = applyFalseColor(image_crane_gray, lut16);
+     auto image_craneLE_colored_16 = applyFalseColor(image_crane_gray, lut17);
+     auto image_craneLE_colored_17 = applyFalseColor(image_crane_gray, lut18);
+     auto image_craneLE_colored_18 = applyFalseColor(image_crane_gray, lut19);
+     auto image_craneLE_colored_19 = applyFalseColor(image_crane_gray, lut21);
+     auto image_craneLE_colored_20 = applyFalseColor(image_crane_gray, lut22);
+     auto image_craneLE_colored_21 = applyFalseColor(image_crane_gray, lut23);
+     auto image_craneLE_colored_22 = applyFalseColor(image_crane_gray, lut24);
+     auto image_craneLE_colored_23 = applyFalseColor(image_crane_gray, lut25);
+     auto image_craneLE_colored_24 = applyFalseColor(image_crane_gray, lut26);
+     auto image_craneLE_colored_25 = applyFalseColor(image_crane_gray, lut27);
+     auto image_craneLE_colored_26 = applyFalseColor(image_crane_gray, lut28);
+     auto image_craneLE_colored_27 = applyFalseColor(image_crane_gray, lut29);
+     auto image_craneLE_colored_28 = applyFalseColor(image_crane_gray, lut31);
+     auto image_craneLE_colored_29 = applyFalseColor(image_crane_gray, lut32);
+     auto image_craneLE_colored_30 = applyFalseColor(image_crane_gray, lut33);
+     auto image_craneLE_colored_31 = applyFalseColor(image_crane_gray, lut34);
+     auto image_craneLE_colored_32 = applyFalseColor(image_crane_gray, lut35);
+     auto image_craneLE_colored_33 = applyFalseColor(image_crane_gray, lut36);
+     auto image_craneLE_colored_34 = applyFalseColor(image_crane_gray, lut37);
+     auto image_craneLE_colored_35 = applyFalseColor(image_crane_gray, lut38);
+     auto image_craneLE_colored_36 = applyFalseColor(image_crane_gray, lut39);
+     auto image_craneLE_colored_37 = applyFalseColor(image_crane_gray, lut41);
+     auto image_craneLE_colored_38 = applyFalseColor(image_crane_gray, lut42);
+     auto image_craneLE_colored_39 = applyFalseColor(image_crane_gray, lut43);
+     auto image_craneLE_colored_40 = applyFalseColor(image_crane_gray, lut44);
+     auto image_craneLE_colored_41 = applyFalseColor(image_crane_gray, lut45);
+     auto image_craneLE_colored_42 = applyFalseColor(image_crane_gray, lut46);
+     auto image_craneLE_colored_43 = applyFalseColor(image_crane_gray, lut47);
+     auto image_craneLE_colored_44 = applyFalseColor(image_crane_gray, lut48);
+     auto image_craneLE_colored_45 = applyFalseColor(image_crane_gray, lut49);
+     auto image_craneLE_colored_46 = applyFalseColor(image_crane_gray, lut51);
+     auto image_craneLE_colored_47 = applyFalseColor(image_crane_gray, lut52);
+     auto image_craneLE_colored_48 = applyFalseColor(image_crane_gray, lut53);
+     auto image_craneLE_colored_49 = applyFalseColor(image_crane_gray, lut54);
+     auto image_craneLE_colored_50 = applyFalseColor(image_crane_gray, lut55);
+     auto image_craneLE_colored_51 = applyFalseColor(image_crane_gray, lut56);
+     auto image_craneLE_colored_52 = applyFalseColor(image_crane_gray, lut57);
+     auto image_craneLE_colored_53 = applyFalseColor(image_crane_gray, lut58);
+     auto image_craneLE_colored_54 = applyFalseColor(image_crane_gray, lut59);
+     auto image_craneLE_colored_55 = applyFalseColor(image_crane_gray, lut61);
+     auto image_craneLE_colored_56 = applyFalseColor(image_crane_gray, lut62);
+     auto image_craneLE_colored_57 = applyFalseColor(image_crane_gray, lut63);
+     auto image_craneLE_colored_58 = applyFalseColor(image_crane_gray, lut64);
+     auto image_craneLE_colored_59 = applyFalseColor(image_crane_gray, lut65);
+     auto image_craneLE_colored_60 = applyFalseColor(image_crane_gray, lut66);
+     auto image_craneLE_colored_61 = applyFalseColor(image_crane_gray, lut67);
+     auto image_craneLE_colored_62 = applyFalseColor(image_crane_gray, lut68);
+     auto image_craneLE_colored_63 = applyFalseColor(image_crane_gray, lut69);
+     auto image_craneLE_colored_64 = applyFalseColor(image_crane_gray, lut71);
+     auto image_craneLE_colored_65 = applyFalseColor(image_crane_gray, lut72);
+     auto image_craneLE_colored_66 = applyFalseColor(image_crane_gray, lut73);
+     auto image_craneLE_colored_67 = applyFalseColor(image_crane_gray, lut74);
+     auto image_craneLE_colored_68 = applyFalseColor(image_crane_gray, lut75);
+     auto image_craneLE_colored_69 = applyFalseColor(image_crane_gray, lut76);
+     auto image_craneLE_colored_70 = applyFalseColor(image_crane_gray, lut77);
+     auto image_craneLE_colored_71 = applyFalseColor(image_crane_gray, lut78);
+     auto image_craneLE_colored_72 = applyFalseColor(image_crane_gray, lut79);
+     auto image_craneLE_colored_73 = applyFalseColor(image_crane_gray, lut81);
+     auto image_craneLE_colored_74 = applyFalseColor(image_crane_gray, lut82);
+     auto image_craneLE_colored_75 = applyFalseColor(image_crane_gray, lut83);
+     auto image_craneLE_colored_76 = applyFalseColor(image_crane_gray, lut84);
+     auto image_craneLE_colored_77 = applyFalseColor(image_crane_gray, lut85);
+     auto image_craneLE_colored_78 = applyFalseColor(image_crane_gray, lut86);
+     auto image_craneLE_colored_79 = applyFalseColor(image_crane_gray, lut87);
+     auto image_craneLE_colored_80 = applyFalseColor(image_crane_gray, lut88);
+     auto image_craneLE_colored_81 = applyFalseColor(image_crane_gray, lut89);
+     auto image_craneLE_colored_82 = applyFalseColor(image_crane_gray, lut90);
+     auto image_craneLE_colored_83 = applyFalseColor(image_crane_gray, lut91);
+     auto image_craneLE_colored_84 = applyFalseColor(image_crane_gray, lut92);
+     auto image_craneLE_colored_85 = applyFalseColor(image_crane_gray, lut93);
+     auto image_craneLE_colored_86 = applyFalseColor(image_crane_gray, lut94);
+     auto image_craneLE_colored_87 = applyFalseColor(image_crane_gray, lut95);
+     auto image_craneLE_colored_88 = applyFalseColor(image_crane_gray, lut96);
+     auto image_craneLE_colored_89 = applyFalseColor(image_crane_gray, lut97);
+     auto image_craneLE_colored_90 = applyFalseColor(image_crane_gray, lut98);
+     auto image_craneLE_colored_91 = applyFalseColor(image_crane_gray, lut99);
+     auto image_craneLE_colored_92 = applyFalseColor(image_crane_gray, lut100);
+     auto image_craneLE_colored_93 = applyFalseColor(image_crane_gray, lut101);
+     auto image_craneLE_colored_94 = applyFalseColor(image_crane_gray, lut102);
+     auto image_craneLE_colored_95 = applyFalseColor(image_crane_gray, lut103);
+     auto image_craneLE_colored_96 = applyFalseColor(image_crane_gray, lut104);
+     auto image_craneLE_colored_97 = applyFalseColor(image_crane_gray, lut105);
+     auto image_craneLE_colored_98 = applyFalseColor(image_crane_gray, lut106);
+     auto image_craneLE_colored_99 = applyFalseColor(image_crane_gray, lut107);
+     auto image_craneLE_colored_100 = applyFalseColor(image_crane_gray, lut108);
+     auto image_craneLE_colored_101 = applyFalseColor(image_crane_gray, lut109);
+     auto image_craneLE_colored_102 = applyFalseColor(image_crane_gray, lut110);
+     auto image_craneLE_colored_103 = applyFalseColor(image_crane_gray, lut111);
+     auto image_craneLE_colored_104 = applyFalseColor(image_crane_gray, lut112);
+     auto image_craneLE_colored_105 = applyFalseColor(image_crane_gray, lut113);
+     auto image_craneLE_colored_106 = applyFalseColor(image_crane_gray, lut114);
+     auto image_craneLE_colored_107 = applyFalseColor(image_crane_gray, lut115);
+     auto image_craneLE_colored_108 = applyFalseColor(image_crane_gray, lut116);
+     auto image_craneLE_colored_109 = applyFalseColor(image_crane_gray, lut117);
+     auto image_craneLE_colored_110 = applyFalseColor(image_crane_gray, lut118);
+     auto image_craneLE_colored_111 = applyFalseColor(image_crane_gray, lut119);
+     auto image_craneLE_colored_112 = applyFalseColor(image_crane_gray, lut120);
+     auto image_craneLE_colored_113 = applyFalseColor(image_crane_gray, lut121);
+     auto image_craneLE_colored_114 = applyFalseColor(image_crane_gray, lut122);
+     auto image_craneLE_colored_115 = applyFalseColor(image_crane_gray, lut123);
+     auto image_craneLE_colored_116 = applyFalseColor(image_crane_gray, lut124);
+     auto image_craneLE_colored_117 = applyFalseColor(image_crane_gray, lut125);
+     auto image_craneLE_colored_118 = applyFalseColor(image_crane_gray, lut126);
+     auto image_craneLE_colored_119 = applyFalseColor(image_crane_gray, lut127);
+     auto image_craneLE_colored_120 = applyFalseColor(image_crane_gray, lut128);
+     auto image_craneLE_colored_121 = applyFalseColor(image_crane_gray, lut129);
+     auto image_craneLE_colored_122 = applyFalseColor(image_crane_gray, lut130);
+     auto image_craneLE_colored_123 = applyFalseColor(image_crane_gray, lut131);
+     auto image_craneLE_colored_124 = applyFalseColor(image_crane_gray, lut132);
+     auto image_craneLE_colored_125 = applyFalseColor(image_crane_gray, lut133);
+     auto image_craneLE_colored_126 = applyFalseColor(image_crane_gray, lut134);
+     auto image_craneLE_colored_127 = applyFalseColor(image_crane_gray, lut135);
+     auto image_craneLE_colored_128 = applyFalseColor(image_crane_gray, lut136);
+     auto image_craneLE_colored_129 = applyFalseColor(image_crane_gray, lut137);
+     auto image_craneLE_colored_130 = applyFalseColor(image_crane_gray, lut138);
+     auto image_craneLE_colored_131 = applyFalseColor(image_crane_gray, lut139);
+     auto image_craneLE_colored_132 = applyFalseColor(image_crane_gray, lut140);
+     auto image_craneLE_colored_133 = applyFalseColor(image_crane_gray, lut141);
+     auto image_craneLE_colored_134 = applyFalseColor(image_crane_gray, lut142);
+     auto image_craneLE_colored_135 = applyFalseColor(image_crane_gray, lut143);
+     auto image_craneLE_colored_136 = applyFalseColor(image_crane_gray, lut144);
+     auto image_craneLE_colored_137 = applyFalseColor(image_crane_gray, lut145);
+     auto image_craneLE_colored_138 = applyFalseColor(image_crane_gray, lut146);
+     auto image_craneLE_colored_139 = applyFalseColor(image_crane_gray, lut147);
+     auto image_craneLE_colored_140 = applyFalseColor(image_crane_gray, lut148);
+     auto image_craneLE_colored_141 = applyFalseColor(image_crane_gray, lut149);
+     auto image_craneLE_colored_142 = applyFalseColor(image_crane_gray, lut150);
+     auto image_craneLE_colored_143 = applyFalseColor(image_crane_gray, lut151);
+     auto image_craneLE_colored_144 = applyFalseColor(image_crane_gray, lut152);
+     auto image_craneLE_colored_145 = applyFalseColor(image_crane_gray, lut153);
+     auto image_craneLE_colored_146 = applyFalseColor(image_crane_gray, lut154);
+     auto image_craneLE_colored_147 = applyFalseColor(image_crane_gray, lut155);
+     auto image_craneLE_colored_148 = applyFalseColor(image_crane_gray, lut156);
+     auto image_craneLE_colored_149 = applyFalseColor(image_crane_gray, lut157);
+     auto image_craneLE_colored_150 = applyFalseColor(image_crane_gray, lut158);
+     auto image_craneLE_colored_151 = applyFalseColor(image_crane_gray, lut159);
+     auto image_craneLE_colored_152 = applyFalseColor(image_crane_gray, lut160);
+     auto image_craneLE_colored_153 = applyFalseColor(image_crane_gray, lut161);
+     auto image_craneLE_colored_154 = applyFalseColor(image_crane_gray, lut162);
+     auto image_craneLE_colored_155 = applyFalseColor(image_crane_gray, lut163);
+     auto image_craneLE_colored_156 = applyFalseColor(image_crane_gray, lut164);
+     auto image_craneLE_colored_157 = applyFalseColor(image_crane_gray, lut165);
+     auto image_craneLE_colored_158 = applyFalseColor(image_crane_gray, lut166);
+     auto image_craneLE_colored_159 = applyFalseColor(image_crane_gray, lut167);
+     auto image_craneLE_colored_160 = applyFalseColor(image_crane_gray, lut168);
+     auto image_craneLE_colored_161 = applyFalseColor(image_crane_gray, lut169);
+     auto image_craneLE_colored_162 = applyFalseColor(image_crane_gray, lut170);
+     auto image_craneLE_colored_163 = applyFalseColor(image_crane_gray, lut171);
+     auto image_craneLE_colored_164 = applyFalseColor(image_crane_gray, lut172);
+     auto image_craneLE_colored_165 = applyFalseColor(image_crane_gray, lut173);
+     auto image_craneLE_colored_166 = applyFalseColor(image_crane_gray, lut174);
+     auto image_craneLE_colored_167 = applyFalseColor(image_crane_gray, lut175);
+     auto image_craneLE_colored_168 = applyFalseColor(image_crane_gray, lut176);
+     auto image_craneLE_colored_169 = applyFalseColor(image_crane_gray, lut177);
+     auto image_craneLE_colored_170 = applyFalseColor(image_crane_gray, lut178);
+     auto image_craneLE_colored_171 = applyFalseColor(image_crane_gray, lut179);
 
    //  // 5. Sauvegarde des images en couleur
    //  savePPM(imageXR__femoral_BE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\coeur_LE.ppm");
@@ -1718,7 +1722,7 @@ int main(){
      savePPM(image_craneLE_colored_171, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\image_craneLE\\image_craneLE_colored_171.ppm");
   
   
-  
+
   
      //image 5 => imageIRM__crane_LE_converted
      auto imageIRM__crane_LE_converted_1 = applyLUT(imageIRM__crane_LE_converted, lut1);
@@ -3122,7 +3126,7 @@ int main(){
   
   
   
-  
+
   
   
   

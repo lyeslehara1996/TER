@@ -188,6 +188,18 @@ std::vector<uint8_t> applyLUT(const std::vector<uint8_t>& grayImage, const std::
     return colorImage;
 }
 
+std::vector<uint8_t> convertRGBToGrayscale(const std::vector<uint8_t>& rgbImage, size_t width, size_t height) {
+    std::vector<uint8_t> grayImage(width * height);
+    for (size_t i = 0; i < width * height; ++i) {
+        uint8_t r = rgbImage[i * 3 + 0];
+        uint8_t g = rgbImage[i * 3 + 1];
+        uint8_t b = rgbImage[i * 3 + 2];
+        grayImage[i] = static_cast<uint8_t>(0.299 * r + 0.587 * g + 0.114 * b);
+    }
+    return grayImage;
+}
+
+
 std::vector<unsigned char> applyFalseColor(const std::vector<unsigned char>& grayImage, const std::vector<unsigned char>& lut) {
     if (lut.size() % 3 != 0) {
         throw std::runtime_error("Invalid LUT size. It must be a multiple of 3.");
