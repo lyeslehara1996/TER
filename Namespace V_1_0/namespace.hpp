@@ -188,6 +188,32 @@ std::vector<uint8_t> applyLUT(const std::vector<uint8_t>& grayImage, const std::
     return colorImage;
 }
 
+std::vector<unsigned char> applyFalseColor(const std::vector<unsigned char>& grayImage, const std::vector<unsigned char>& lut) {
+    if (lut.size() % 3 != 0) {
+        throw std::runtime_error("Invalid LUT size. It must be a multiple of 3.");
+    }
+
+    size_t numColors = lut.size() / 3;
+    std::vector<unsigned char> coloredImage(grayImage.size() * 3);
+
+    for (size_t i = 0; i < grayImage.size(); ++i) {
+        unsigned char intensity = grayImage[i];
+
+        if (intensity >= numColors) {
+            throw std::runtime_error("Gray level out of LUT range");
+        }
+
+        size_t lutIndex = intensity * 3;
+
+        coloredImage[3 * i + 0] = lut[lutIndex + 0]; // R
+        coloredImage[3 * i + 1] = lut[lutIndex + 1]; // G
+        coloredImage[3 * i + 2] = lut[lutIndex + 2]; // B
+    }
+
+    return coloredImage;
+}
+
+
 // Conversion de type avec dynamique
 template<typename SrcType, typename DstType>
 std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjustDynamics) {
