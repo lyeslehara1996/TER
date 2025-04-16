@@ -66,16 +66,7 @@ namespace v1_0 {
         ofs.write(reinterpret_cast<const char*>(image.data()), image.size());
     }
 
-    // Sauvegarde en PGM pour des types 16 bits (comme uint16_t)
-    void savePGM16(const std::vector<uint16_t>& image, size_t width, size_t height, const std::string& filename) {
-        std::ofstream ofs(filename, std::ios::binary);
-        ofs << "P5\n" << width << " " << height << "\n65535\n";
-        for (auto val : image) {
-            ofs.put(val >> 8);    // High byte
-            ofs.put(val & 0xFF);  // Low byte
-        }
-    }
-
+   
     template <typename T>
     std::vector<T> createRGBImage(size_t width, size_t height, T R, T G, T B) {
         static_assert(std::is_integral<T>::value, "createRGBImage requiert un type entier");
@@ -177,16 +168,16 @@ std::vector<uint8_t> loadLUTBinary(const std::string& filename) {
 }
 
 
-std::vector<uint8_t> applyLUT(const std::vector<uint8_t>& grayImage, const std::vector<uint8_t>& lut) {
-    std::vector<uint8_t> colorImage(grayImage.size() * 3);
-    for (size_t i = 0; i < grayImage.size(); ++i) {
-        uint8_t val = grayImage[i];
-        colorImage[i * 3 + 0] = lut[val * 3 + 0];
-        colorImage[i * 3 + 1] = lut[val * 3 + 1];
-        colorImage[i * 3 + 2] = lut[val * 3 + 2];
-    }
-    return colorImage;
-}
+// std::vector<uint8_t> applyLUT(const std::vector<uint8_t>& grayImage, const std::vector<uint8_t>& lut) {
+//     std::vector<uint8_t> colorImage(grayImage.size() * 3);
+//     for (size_t i = 0; i < grayImage.size(); ++i) {
+//         uint8_t val = grayImage[i];
+//         colorImage[i * 3 + 0] = lut[val * 3 + 0];
+//         colorImage[i * 3 + 1] = lut[val * 3 + 1];
+//         colorImage[i * 3 + 2] = lut[val * 3 + 2];
+//     }
+//     return colorImage;
+// }
 
 std::vector<uint8_t> convertRGBToGrayscale(const std::vector<uint8_t>& rgbImage, size_t width, size_t height) {
     std::vector<uint8_t> grayImage(width * height);
@@ -200,7 +191,7 @@ std::vector<uint8_t> convertRGBToGrayscale(const std::vector<uint8_t>& rgbImage,
 }
 
 
-std::vector<unsigned char> applyFalseColor(const std::vector<unsigned char>& grayImage, const std::vector<unsigned char>& lut) {
+std::vector<unsigned char> applyLUT(const std::vector<unsigned char>& grayImage, const std::vector<unsigned char>& lut) {
     if (lut.size() % 3 != 0) {
         throw std::runtime_error("Invalid LUT size. It must be a multiple of 3.");
     }
@@ -248,7 +239,7 @@ std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjust
 }
 
 template <typename T>
-std::vector<T> readRawImageWithChannels(const std::string& filename, size_t width, size_t height, size_t channels, bool bigEndian = false) {
+std::vector<T> readRawImageRGB(const std::string& filename, size_t width, size_t height, size_t channels, bool bigEndian = false) {
     static_assert(std::is_integral<T>::value, "T doit être un type entier");
     std::ifstream testFile(filename);
     if (!testFile) {

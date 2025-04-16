@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/lylehara/Downloads/TER/Exercices C++/exercice13-01",
-      "program": "c:/Users/lylehara/Downloads/TER/Exercices C++/exercice13-01/build/Debug/outDebug",
+      "cwd": "c:/Users/lylehara/Downloads/TER/Namespace V1.1",
+      "program": "c:/Users/lylehara/Downloads/TER/Namespace V1.1/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

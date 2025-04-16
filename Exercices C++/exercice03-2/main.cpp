@@ -5,7 +5,7 @@ const double g = 9.8;
 
 
 double hauteur_chute(double h0, double t) {
-    double h = h0 - 0.5 * g * p * t * t;
+    double h = h0 - 0.5 * g * t * t;
     return (h > 0) ? h : 0; // Si h < 0, retourner 0 (l'objet est au sol)
 }
 
