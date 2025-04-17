@@ -20,7 +20,6 @@ Et c’est exactement comme ce que je te proposais avec le .tpp :
 
 */
 
-
 #ifndef IMAGE_HPP
 #define IMAGE_HPP
 
@@ -39,6 +38,7 @@ Et c’est exactement comme ce que je te proposais avec le .tpp :
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+namespace v1_1{
 
 template<typename T>
 class Image {
@@ -205,4 +205,5 @@ const T& Image<T>::operator()(size_t x, size_t y) const {
     return _data[y * _width + x];
 }
 
+}
 #endif

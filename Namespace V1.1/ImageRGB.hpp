@@ -7,7 +7,8 @@
 #include <vector>
 #include <stdexcept>
 
-
+using namespace v1_1;
+namespace v1_1 {
 class ImageRGB : public Image<unsigned char>{
 
 public :
@@ -126,5 +127,5 @@ std::vector<uint8_t> convertRGBToGrayscale(const std::vector<uint8_t>& rgbImage,
 
 
 
-
+}
 #endif

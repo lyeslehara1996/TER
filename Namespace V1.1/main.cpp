@@ -5,6 +5,7 @@
 
 
 int main() {
+    using namespace v1_1;
     const size_t width = 256;
     const size_t height = 256;
     //question 1
