@@ -13,12 +13,7 @@
 
 namespace v1_0 {
 
-    //La reponse à la Première question 
-    /*
-    la création d'images particulières (blanche, mire sinusoïdale, damier)
-    */
-
-    // Allocation d'une image
+    
     template <typename T>
     std::vector<T> allocationImage(size_t width, size_t height) {
         return std::vector<T>(width * height);
@@ -32,14 +27,14 @@ namespace v1_0 {
 
     // Mire sinusoïdale
     template <typename T>
-    std::vector<T> createSinusoidalImage(size_t width, size_t height, double frequency) {
+    std::vector<T> SinusoidalImage(size_t width, size_t height, double frequence) {
         std::vector<T> image(width * height);
 
         for (size_t y = 0; y < height; ++y) {
             for (size_t x = 0; x < width; ++x) {
-                double val = std::sin(2 * M_PI * frequency * x / width);
-                double normalized = (val + 1.0) * 0.5; // [0, 1]
-                image[y * width + x] = static_cast<T>(normalized * std::numeric_limits<T>::max());
+                double valeur = std::sin(2 * M_PI * frequence * x / width);
+                double Valnormaliser = (valeur + 1.0) * 0.5; // normaliser en 0 et 1 
+                image[y * width + x] = static_cast<T>(Valnormaliser * std::numeric_limits<T>::max());
             }
         }
         return image;
@@ -47,12 +42,12 @@ namespace v1_0 {
 
     // Damier
     template <typename T>
-    std::vector<T> createCheckerboardImage(size_t width, size_t height, size_t squareSize) {
+    std::vector<T> ImageDamier(size_t width, size_t height, size_t tailleCase) {
         std::vector<T> image(width * height);
 
         for (size_t y = 0; y < height; ++y) {
             for (size_t x = 0; x < width; ++x) {
-                bool isWhite = ((x / squareSize) % 2 == (y / squareSize) % 2);
+                bool isWhite = ((x / tailleCase) % 2 == (y / tailleCase) % 2);
                 image[y * width + x] = isWhite ? std::numeric_limits<T>::max() : 0;
             }
         }
@@ -65,7 +60,6 @@ namespace v1_0 {
         ofs << "P5\n" << width << " " << height << "\n255\n";
         ofs.write(reinterpret_cast<const char*>(image.data()), image.size());
     }
-
    
     template <typename T>
     std::vector<T> createRGBImage(size_t width, size_t height, T R, T G, T B) {
@@ -79,6 +73,7 @@ namespace v1_0 {
         }
         return imageRGB;
     }
+    
     void savePPM(const std::vector<unsigned char>& image, int width, int height, const std::string& filename) {
         std::ofstream file(filename, std::ios::binary);
         if (!file) {
@@ -139,6 +134,7 @@ std::vector<T> readRawImage(const std::string& filename, size_t width, size_t he
     return image;
 }
 
+
 template <typename T>
 void writeRawImage(const std::vector<T>& image, const std::string& filename, bool bigEndian = false) {
     std::ofstream ofs(filename, std::ios::binary);
@@ -156,7 +152,7 @@ void writeRawImage(const std::vector<T>& image, const std::string& filename, boo
 }
 
 
-std::vector<uint8_t> loadLUTBinary(const std::string& filename) {
+std::vector<uint8_t> loadLUT(const std::string& filename) {
     std::vector<uint8_t> lut(256 * 3);
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
