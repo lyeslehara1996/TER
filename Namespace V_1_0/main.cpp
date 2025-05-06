@@ -12,7 +12,7 @@ int main(){
     //la Reponse a la première question 
 
     // 1. Création image blanche
-    auto whiteImage = createWhiteImage<uint8_t>(width, height);
+    auto whiteImage = ImageBlanche<uint8_t>(width, height);
     savePGM(whiteImage, width, height, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\whiteImage.pgm");
 
     // 2.  sinusoïdale
@@ -24,7 +24,7 @@ int main(){
     savePGM(checkerboardImage, width, height, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\checkerboardImage.pgm");
 
     //4.image en couleur RGB
-    auto rgbImage = createRGBImage<uint8_t>(width, height, 255, 128, 64);
+    auto rgbImage = RGBImage<uint8_t>(width, height, 255, 128, 64);
     savePPM(rgbImage, width, height, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\rgbImage.ppm");
    
     //afficher la matrice de l'image a la console 
