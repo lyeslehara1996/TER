@@ -61,7 +61,6 @@ public:
     template<typename SrcType, typename DstType>
      std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjustDynamics);
 
-
     T& operator()(size_t x, size_t y);
     const T& operator()(size_t x, size_t y) const;
 
