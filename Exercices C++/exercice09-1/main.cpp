@@ -5,7 +5,7 @@ int find(const int tab[], int valeur, int left, int right)
 
     while (left <= right)
     {
-    int mediane = left + (right - left) / 2 ;
+    int mediane =  (right + left) / 2 ;
 
     if(tab[mediane] == valeur){
         return mediane ;
