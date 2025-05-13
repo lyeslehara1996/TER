@@ -35,31 +35,31 @@ case 1:{
    //la Reponse a la première question 
 
     // 1. Création image blanche
-    auto whiteImage = v1_0::ImageBlanche<uint8_t>(Largeur, Hauteur);
-    v1_0::sauvegarderPGM(whiteImage, Largeur, Hauteur, imagePGM + "whiteImage.pgm");
+    auto ImageBlanche = v1_0::ImageBlanche<uint8_t>(Largeur, Hauteur);
+    v1_0::sauvegarderPGM(ImageBlanche, Largeur, Hauteur, imagePGM + "ImageBlanche.pgm");
 
     // 2.  sinusoïdale
     auto sinusImage = v1_0::SinusoidalImage<uint16_t>(Largeur, Hauteur, 8.0); 
     // savePGM16(sinusImage, Largeur, Hauteur, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\sinusImage.pgm");
     v1_0::EcritureImageRaw(sinusImage, ImageRaw + "sinus_image.raw");
     // 3. Damier
-    auto checkerboardImage = v1_0::ImageDamier<uint8_t>(Largeur, Hauteur, 32); 
-    v1_0::sauvegarderPGM(checkerboardImage, Largeur, Hauteur, imagePGM + "checkerboardImage.pgm");
+    auto DamierImage = v1_0::ImageDamier<uint8_t>(Largeur, Hauteur, 32); 
+    v1_0::sauvegarderPGM(DamierImage, Largeur, Hauteur, imagePGM + "DamierImage.pgm");
 
     //4.image en couleur RGB
     auto rgbImage = v1_0::RGBImage<uint8_t>(Largeur, Hauteur, 255, 128, 64);
     v1_0::sauvegarderPPM(rgbImage, Largeur, Hauteur, imagePGM + "rgbImage.ppm");
    
     //afficher la matrice de l'image a la console 
-    v1_0::printImage(checkerboardImage, 4, 3);
+    v1_0::printImage(DamierImage, 4, 3);
 
     auto sinusImage_BE = v1_0::LecteurImageRAW<uint16_t>(ImageRaw + "sinus_image.raw", 256, 256, false); // Little Endian
     auto sinusImage_LE = v1_0::LecteurImageRAW<uint16_t>(ImageRaw +"sinus_image.raw", 256, 256, true); // Big Endian
      
-    auto sinusImage_BE_converted = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_BE, true);
-    v1_0::sauvegarderPGM(sinusImage_BE_converted, Largeur, Hauteur, imagePGM + "sinusImage_BE_converted.pgm");
-    auto sinusImage_LE_converted = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_LE, true);
-    v1_0::sauvegarderPGM(sinusImage_LE_converted, Largeur, Hauteur, imagePGM + "isinusImage_BE_converted.pgm");
+    auto sinusImage_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_BE, true);
+    v1_0::sauvegarderPGM(sinusImage_BE_converte, Largeur, Hauteur, imagePGM + "sinusImage_BE_converte.pgm");
+    auto sinusImage_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_LE, true);
+    v1_0::sauvegarderPGM(sinusImage_LE_converte, Largeur, Hauteur, imagePGM + "sinusImage_LE_converte.pgm");
  
    
     // 1. Lecture de fichiers RAW (8 bits)
@@ -82,16 +82,16 @@ case 1:{
    //  // 4. Application de la LUT sur les images
    // image 1 => imageXR__femoral_BE
 
-    auto imageXR__femoral_BE_colored_1 = v1_0::applLUT(imageXR__femoral_BE, lut1);
-    auto imageXR__femoral_BE_colored_2 = v1_0::applLUT(imageXR__femoral_BE, lut2);
-    auto imageXR__femoral_BE_colored_3 = v1_0::applLUT(imageXR__femoral_BE, lut3);
+    auto imageXR__femoral_BE_RGB_1 = v1_0::applLUT(imageXR__femoral_BE, lut1);
+    auto imageXR__femoral_BE_RGB_2 = v1_0::applLUT(imageXR__femoral_BE, lut2);
+    auto imageXR__femoral_BE_RGB_3 = v1_0::applLUT(imageXR__femoral_BE, lut3);
      
      
     //  // 5. Sauvegarde des images en couleur
     //  savePPM(imageXR__femoral_BE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\coeur_LE.ppm");
-    v1_0::sauvegarderPPM(imageXR__femoral_BE_colored_1, 512, 512,  imageRGBdPath+"imageXR__femoral_BE_colored_1.ppm");
-    v1_0::sauvegarderPPM(imageXR__femoral_BE_colored_2, 512, 512,  imageRGBdPath+"imageXR__femoral_BE_colored_2.ppm");
-    v1_0::sauvegarderPPM(imageXR__femoral_BE_colored_3, 512, 512,  imageRGBdPath+"imageXR__femoral_BE_colored_3.ppm");
+    v1_0::sauvegarderPPM(imageXR__femoral_BE_RGB_1, 512, 512,  imageRGBdPath+"imageXR__femoral_BE_colored_1.ppm");
+    v1_0::sauvegarderPPM(imageXR__femoral_BE_RGB_2, 512, 512,  imageRGBdPath+"imageXR__femoral_BE_colored_2.ppm");
+    v1_0::sauvegarderPPM(imageXR__femoral_BE_RGB_3, 512, 512,  imageRGBdPath+"imageXR__femoral_BE_colored_3.ppm");
      
 break;
 }
