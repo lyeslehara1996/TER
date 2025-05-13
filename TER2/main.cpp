@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "namespace1_0.hpp"
+#include "namespace.hpp"
 #include <filesystem>//
 
 namespace fs = std::filesystem; 
@@ -97,7 +97,7 @@ std::vector<RawImageInfo> images = {
       auto sinusImage_LE_converted = convertImage<uint16_t, uint8_t>(sinusImage_LE, true);
       savePGM(sinusImage_LE_converted, width, height, imagePGM + "isinusImage_BE_converted.pgm");
  
-    // 🗂️ Charger toutes les LUTs
+    //  Charger toutes les LUTs
     std::vector<std::string> lutNames;
     std::vector<decltype(loadLUT(""))> luts;
     for (const auto& lutPath : lutPaths) {
@@ -111,7 +111,7 @@ std::vector<RawImageInfo> images = {
         std::cout << "LUT chargée : " << name << std::endl;
     }
 
- // ⚙️ Appliquer chaque LUT sur chaque image
+ //  Appliquer chaque LUT sur chaque image
  for (const auto& img : images) {
   std::string imagePath = ImageRaw + img.filename;
   std::string imageBaseName = img.filename.substr(0, img.filename.find_last_of('.'));
@@ -161,6 +161,6 @@ std::vector<RawImageInfo> images = {
   }
 }
 
-std::cout << "✅ Traitement terminé !" << std::endl;
+std::cout << " Traitement terminé !" << std::endl;
 
 }
