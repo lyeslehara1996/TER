@@ -16,14 +16,16 @@ struct RawImageInfo {
 
 int main(){
     
+  try {
+
     const size_t Largeur = 256;
     const size_t Hauteur = 256;
 
 
-    std::string ImageRaw= "images_Raw\\images\\" ;
-    std::string imagePGM= "imagePGM/" ;
-    std::string lutPath = "LUT/LUT/";
-    std::string imageRGBPath = "imageRGB/";
+    std::string ImageRaw= "./TER2/images_RAW/" ;
+    std::string imagePGM= "./TER2/imagePGM/" ;
+    std::string lutPath = "./TER2/LUT/";
+    std::string imageRGBPath = "./TER2/imageRGB/";
 
 std::vector<std::string> lutPaths = {
  
@@ -184,28 +186,115 @@ break;
 }
 
 case 2 :{
+  std::string svgrdImageRaw = "C:\\Users\\lylehara\\Downloads\\TER\\TER2\\images_RAW\\";
+  std::string ImageRaw = "C:\\Users\\lylehara\\Downloads\\TER\\TER2\\images_RAW\\images\\";
+  std::string imagePGM = "C:\\Users\\lylehara\\Downloads\\TER\\TER2\\imagePGM\\";
+  std::string imageRGB = "C:\\Users\\lylehara\\Downloads\\TER\\TER2\\imageRGB\\";
+  std::string lutPath = "C:\\Users\\lylehara\\Downloads\\TER\\TER2\\LUT\\LUT\\";
 
-  v1_1::Image<uint8_t> imgBlanche(Largeur, Hauteur);
-  imgBlanche.creerImageBlache();
-  imgBlanche.ecrireFichierRaw("Imageblanche.raw");
-  imgBlanche.sauvegarderPGM(imagePGM + "ImageBlanche.pgm");
-  
+  size_t Largeur = 256, Hauteur = 256;
 
-  v1_1::Image<uint8_t> ImageDamier(Largeur, Hauteur);
-   ImageDamier.creerDamier(64);
-  ImageDamier.ecrireFichierRaw("ImageDamier.raw");
-  ImageDamier.sauvegarderPGM(imagePGM + "ImageDamier.pgm");
-  
-  
+  // Générer images de test
+  v1_1::Image<uint8_t> imageBlanche(Largeur, Hauteur);
+  imageBlanche.creerImageBlache();
+  imageBlanche.ecrireFichierRaw(svgrdImageRaw+"ImageBlanche.raw");
+  imageBlanche.sauvegarderPGM( imagePGM+ "ImageBlanche.pgm");
+
+  v1_1::Image<uint8_t> imageDamier(Largeur, Hauteur);
+  imageDamier.creerDamier(64);
+  imageDamier.ecrireFichierRaw( svgrdImageRaw+"ImageDamier.raw");
+  imageDamier.sauvegarderPGM( imagePGM+"ImageDamier.pgm");
+
   v1_1::Image<uint8_t> imageSinus(Largeur, Hauteur);
   imageSinus.creerSinusoidale(25);
-  imageSinus.ecrireFichierRaw("imageSinus.raw");
-  imageSinus.sauvegarderPGM(imagePGM + "imageSinus.pgm");
+  imageSinus.ecrireFichierRaw( svgrdImageRaw+"ImageSinus.raw");
+  imageSinus.sauvegarderPGM(imagePGM+"ImageSinus.pgm");
 
-  v1_1::Image<uint8_t> XR_femoral(256,256);
-  XR_femoral.lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw",  false);
-  XR_femoral.lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw",  true);
+   //  Charger toutes les LUTs
+   std::vector<std::string> Nomluts;
+   std::vector<decltype(v1_0::ChargerLUT(""))> luts;
+   for (const auto& lutPath : lutPaths) {
+       auto lut = v1_1::ImageRGB::chargerLUT(lutPath);
+       // Extraire le nom de la LUT sans chemin ni extension
+       size_t lastSlash = lutPath.find_last_of("\\/");
+       size_t lastDot = lutPath.find_last_of('.');
+       std::string nomlut = lutPath.substr(lastSlash + 1, lastDot - lastSlash - 1);
+       Nomluts.push_back(nomlut);
+       luts.push_back(lut);
+       std::cout << "LUT chargée avec succée : " << nomlut << std::endl;
+   }
+
+
+
+  // Lire images RAW correctement
+  auto XR_femoral_BE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, false);
+  auto XR_femoral_LE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, true);
+ 
+  auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, false);
+  auto TDM_16_bits_LE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, true);
+
+  auto TDM_16__crane_converted_BE = TDM_16_bits_BE.convertirImage< uint8_t>( true);
+  auto TDM_16__crane_converted_LE = TDM_16_bits_BE.convertirImage< uint8_t>( true);
+
+  //ImgaeRGB
+
+    auto IRM_RGB_crane_BE = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, false);
+    auto IRM_RGB_crane_LE = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, true);
    
+    auto IRM_RGB_crane_BEGris_BE = v1_1::convertRGB_Gris(IRM_RGB_crane_BE, 256, 256);
+    auto IRM_RGB_crane_BEGris_LE = v1_1::convertRGB_Gris(IRM_RGB_crane_BE, 256, 256);
+ 
+
+  XR_femoral_BE.sauvegarderPGM( imagePGM+"XR_femoral_BE.pgm");
+  XR_femoral_LE.sauvegarderPGM( imagePGM+"XR_femoral_LE.pgm");
+  
+  TDM_16__crane_converted_BE.sauvegarderPGM( imagePGM+"TDM_16_bits_BE.pgm");
+  TDM_16__crane_converted_LE.sauvegarderPGM( imagePGM+"TDM_16_bits_LE.pgm");
+
+  IRM_RGB_crane_BEGris_BE.sauvegarderPGM( imagePGM+"IRM_RGB_8_bits_engris_BE.pgm");
+  IRM_RGB_crane_BEGris_LE.sauvegarderPGM( imagePGM+"IRM_RGB_8_bits_engris_LE.pgm");
+
+  // Charger LUT
+  auto lut11 = v1_1::ImageRGB::chargerLUT(lutPath + "000-gray.lut");
+  auto lut12 = v1_1::ImageRGB::chargerLUT(lutPath + "001-fire.lut");
+
+  // Appliquer LUT
+  v1_1::ImageRGB XR_femoral_BE_LUT_11(XR_femoral_BE, 512, 512, lut11);
+  
+  v1_1::ImageRGB TDM_16__crane_converted_LE_11(TDM_16__crane_converted_LE, 512, 512, lut11);
+  v1_1::ImageRGB TDM_16__crane_converted_BE_11(TDM_16__crane_converted_BE, 512, 512, lut11);
+  
+  v1_1::ImageRGB TDM_16__crane_converted_LE_12(TDM_16__crane_converted_LE, 512, 512, lut12);
+  v1_1::ImageRGB TDM_16__crane_converted_BE_12(TDM_16__crane_converted_BE, 512, 512, lut12);
+  
+
+  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT_BE(IRM_RGB_crane_BEGris_BE, 256, 256, lut11);
+  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT_LE(IRM_RGB_crane_BEGris_LE, 256, 256, lut11);
+
+  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT1_BE(IRM_RGB_crane_BEGris_BE, 256, 256, lut12);
+  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT1_LE(IRM_RGB_crane_BEGris_LE, 256, 256, lut12);
+
+
+  // Sauvegarder en .ppm
+  XR_femoral_BE_LUT_11.sauvegarderPPM( imageRGB+ "XR_femoral_BE_LUT_11.ppm");
+
+  TDM_16__crane_converted_LE_11.sauvegarderPPM( imageRGB+ " TDM_16__crane_converted_LE_1.ppm");
+  TDM_16__crane_converted_BE_11.sauvegarderPPM( imageRGB+ " TDM_16__crane_converted_BE_1.ppm");
+
+  TDM_16__crane_converted_LE_12.sauvegarderPPM( imageRGB+ " TDM_16__crane_converted_LE_2.ppm");
+  TDM_16__crane_converted_BE_12.sauvegarderPPM( imageRGB+ " TDM_16__crane_converted_BE_2.ppm");
+
+  IRM_RGB_crane_BEGris_LUT_BE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT1_BE.ppm");
+  IRM_RGB_crane_BEGris_LUT_LE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT1_LE.ppm");
+
+  IRM_RGB_crane_BEGris_LUT1_BE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT2_BE_2.ppm");
+  IRM_RGB_crane_BEGris_LUT1_LE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT2_LE_2.ppm");
+
+
+
+
+
+  std::cout << "Sauvegarde terminée avec succès.\n";
   break;
 }
 
@@ -226,5 +315,8 @@ std::cout << "Choix invalide, veuillez taper 0, 1 ou 2.\n";
 
 }
 }
-
+   } catch (const std::exception& e) {
+        std::cerr << "Exception attrapée : " << e.what() << std::endl;
+        return 1;
+    }
 }
