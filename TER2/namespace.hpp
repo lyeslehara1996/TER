@@ -12,30 +12,43 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <math.h>
+#include <cstdint>
+#include <cmath> 
+#include <limits>
+#include <iomanip> 
+#include <algorithm>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace v1_0 {
 
     
     template <typename T>
-    std::vector<T> allocationImage(int width, int height) {
-        return std::vector<T>(width * height);
+    std::vector<T> allocationImage(size_t largeur, size_t hauteur) {
+        return std::vector<T>(largeur * hauteur);
     }
 
     // Image blanche
     template <typename T>
-    std::vector<T> ImageBlanche(int width, int height) {
-        return std::vector<T>(width * height, std::numeric_limits<T>::max());
+    std::vector<T> ImageBlanche(size_t largeur, size_t hauteur) {
+        return std::vector<T>(largeur * hauteur, std::numeric_limits<T>::max());
     }
 
     // Mire sinusoïdale
     template <typename T>
-    std::vector<T> SinusoidalImage(int width, int height, double frequence) {
-        std::vector<T> image(width * height);
+    std::vector<T> SinusoidalImage(size_t largeur, size_t hauteur, double frequence) {
+        std::vector<T> image(largeur * hauteur);
 
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                double valeur = std::sin(2 * M_PI * frequence * x / width);
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                double valeur = std::sin(2 * M_PI * frequence * x / largeur);
                 double Valnormaliser = (valeur + 1.0) * 0.5; // normaliser en 0 et 1 
-                image[y * width + x] = static_cast<T>(Valnormaliser * std::numeric_limits<T>::max());
+                image[y * largeur + x] = static_cast<T>(Valnormaliser * std::numeric_limits<T>::max());
             }
         }
         return image;
@@ -43,31 +56,31 @@ namespace v1_0 {
 
     // Damier
     template <typename T>
-    std::vector<T> ImageDamier(int width, int height, int tailleCase) {
-        std::vector<T> image(width * height);
+    std::vector<T> ImageDamier(size_t largeur, size_t hauteur, size_t tailleCase) {
+        std::vector<T> image(largeur * hauteur);
 
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                bool isWhite = ((x / tailleCase) % 2 == (y / tailleCase) % 2);
-                image[y * width + x] = isWhite ? std::numeric_limits<T>::max() : 0;
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                bool estBlanc = ((x / tailleCase) % 2 == (y / tailleCase) % 2);
+                image[y * largeur + x] = estBlanc ? std::numeric_limits<T>::max() : 0;
             }
         }
         return image;
     }
 
     // Sauvegarde en PGM (grayscale)
-    void sauvegarderPGM(const std::vector<uint8_t>& image, int width, int height, const std::string& filename) {
-        std::ofstream ofs(filename, std::ios::binary);
-        ofs << "P5\n" << width << " " << height << "\n255\n";
+    void sauvegarderPGM(const std::vector<uint8_t>& image, size_t largeur, size_t hauteur, const std::string& fichier) {
+        std::ofstream ofs(fichier, std::ios::binary);
+        ofs << "P5\n" << largeur << " " << hauteur << "\n255\n";
         ofs.write(reinterpret_cast<const char*>(image.data()), image.size());
     }
    
     template <typename T>
-    std::vector<T> RGBImage(int width, int height, T R, T G, T B) {
+    std::vector<T> RGBImage(size_t largeur, size_t hauteur, T R, T G, T B) {
         static_assert(std::is_integral<T>::value, "createRGBImage requiert un type entier");
     
-        std::vector<T> imageRGB(width * height * 3);
-        for (int i = 0; i < width * height; ++i) {
+        std::vector<T> imageRGB(largeur * hauteur * 3);
+        for (size_t i = 0; i < largeur * hauteur; ++i) {
             imageRGB[i * 3 + 0] = R;
             imageRGB[i * 3 + 1] = G;
             imageRGB[i * 3 + 2] = B;
@@ -75,26 +88,26 @@ namespace v1_0 {
         return imageRGB;
     }
     
-    void sauvegarderPPM(const std::vector<unsigned char>& image, int width, int height, const std::string& filename) {
-        std::ofstream file(filename, std::ios::binary);
+    void sauvegarderPPM(const std::vector<unsigned char>& image, int largeur, int hauteur, const std::string& fichier) {
+        std::ofstream file(fichier, std::ios::binary);
         if (!file) {
-            std::cerr << "Erreur : impossible de créer le fichier " << filename << std::endl;
+            std::cerr << "Erreur : impossible de créer le fichier " << fichier << std::endl;
             return;
         }
     
         // Écrire l'en-tête du fichier PPM
-        file << "P6\n" << width << " " << height << "\n255\n";
+        file << "P6\n" << largeur << " " << hauteur << "\n255\n";
     
         // Écrire les données de l'image (R, G, B)
-        file.write(reinterpret_cast<const char*>(image.data()), width * height * 3);
+        file.write(reinterpret_cast<const char*>(image.data()), largeur * hauteur * 3);
     
         file.close();
     }
 
-    void printImage(const std::vector<uint8_t>& image, int width, int height) {
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                std::cout << std::setw(4) << static_cast<int>(image[y * width + x]) << " ";
+    void printImage(const std::vector<uint8_t>& image, size_t largeur, size_t hauteur) {
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                std::cout << std::setw(4) << static_cast<int>(image[y * largeur + x]) << " ";
             }
             std::cout << '\n';
         }
@@ -106,56 +119,37 @@ namespace v1_0 {
      et le codage little endian (le plus répandu pour les images codées sur plusieurs octets). 
     */
     
-    template <typename T>
-std::vector<T> LecteurImageRAW(const std::string& filename, int width, int height, bool bigEndian = false) {
-    static_assert(std::is_integral<T>::value, "T doit être un type entier");
 
-    std::ifstream ifs(filename, std::ios::binary);
-    std::vector<T> image(width * height);
+    template<typename T>
+    std::vector<T> lireImageRAW(const std::string& nomFichier, int largeur, int hauteur,bool bigEndian = false) {
+        std::ifstream in(nomFichier, std::ios::binary);
+        if (!in) throw std::runtime_error("Erreur d'ouverture du fichier : " + nomFichier);
 
-    if (!ifs) {
-        std::cerr << "Erreur ouverture RAW " << sizeof(T)*8 << " bits.\n";
-        return image;
-    }
+        size_t nbPixels = largeur * hauteur;
+       std::vector<T> img(nbPixels);
+        in.read(reinterpret_cast<char*>(img.data()), nbPixels * sizeof(T));
 
-    for (int i = 0; i < image.size(); ++i) {
-        uint8_t bytes[sizeof(T)];
-        ifs.read(reinterpret_cast<char*>(bytes), sizeof(T));
-        T value = 0;
-        if (bigEndian) {
-            for (int b = 0; b < sizeof(T); ++b)
-                value = (value << 8) | bytes[b];
-        } else {
-            for (int b = 0; b < sizeof(T); ++b)
-                value |= (static_cast<T>(bytes[b]) << (8 * b));
+        if (bigEndian && sizeof(T) > 1) {
+            for (T& pixel : img) {
+                uint8_t* ptr = reinterpret_cast<uint8_t*>(&pixel);
+                std::reverse(ptr, ptr + sizeof(T));
+            }
         }
-        image[i] = value;
+        in.close();
+        return img;
     }
 
-    return image;
-}
 
-
-template <typename T>
-void EcritureImageRaw(const std::vector<T>& image, const std::string& filename, bool bigEndian = false) {
-    std::ofstream ofs(filename, std::ios::binary);
-    for (T val : image) {
-        uint8_t bytes[sizeof(T)] = {};
-        if (bigEndian) {
-            for (int b = 0; b < sizeof(T); ++b)
-                bytes[sizeof(T) - 1 - b] = (val >> (8 * b)) & 0xFF;
-        } else {
-            for (int b = 0; b < sizeof(T); ++b)
-                bytes[b] = (val >> (8 * b)) & 0xFF;
-        }
-        ofs.write(reinterpret_cast<char*>(bytes), sizeof(T));
+    template<typename T>
+    void ecrireFichierRaw(const std::vector<T>& image, const std::string& filename) {
+        std::ofstream out(filename, std::ios::binary);
+        out.write(reinterpret_cast<const char*>(image.data()), image.size() * sizeof(T));
+        out.close();
     }
-}
 
-
-std::vector<uint8_t> ChargerLUT(const std::string& filename) {
+std::vector<uint8_t> chargerLUT(const std::string& fichier) {
     std::vector<uint8_t> lut(256 * 3);
-    std::ifstream file(filename, std::ios::binary);
+    std::ifstream file(fichier, std::ios::binary);
     if (!file) {
         std::cerr << "Erreur de lecture du fichier LUT\n";
         return lut;
@@ -166,93 +160,100 @@ std::vector<uint8_t> ChargerLUT(const std::string& filename) {
 
 
 
-std::vector<uint8_t> convertRGBenGris(const std::vector<uint8_t>& rgbImage, int width, int height) {
-    std::vector<uint8_t> grayImage(width * height);
-    for (int i = 0; i < width * height; ++i) {
+std::vector<uint8_t> convertRGB_Gris(const std::vector<uint8_t>& rgbImage, size_t largeur, size_t hauteur) {
+    std::vector<uint8_t> imageGris(largeur * hauteur);
+    for (size_t i = 0; i < largeur * hauteur; ++i) {
         uint8_t r = rgbImage[i * 3 + 0];
         uint8_t g = rgbImage[i * 3 + 1];
         uint8_t b = rgbImage[i * 3 + 2];
-        grayImage[i] = static_cast<uint8_t>(0.299 * r + 0.587 * g + 0.114 * b);
+        imageGris[i] = static_cast<uint8_t>(0.299 * r + 0.587 * g + 0.114 * b);
     }
-    return grayImage;
+    return imageGris;
 }
 
 
-std::vector<unsigned char> applLUT(const std::vector<unsigned char>& grayImage, const std::vector<unsigned char>& lut) {
+std::vector<unsigned char> applLUT(const std::vector<unsigned char>& imageGris, const std::vector<unsigned char>& lut) {
     if (lut.size() % 3 != 0) {
         throw std::runtime_error("LUT doit contenir un multiple de 3 valeurs RGB.");
     }
 
-    int numColors = lut.size() / 3;
-    std::vector<unsigned char> coloredImage(grayImage.size() * 3);
+    size_t numColors = lut.size() / 3;
+    std::vector<unsigned char> imageRGB(imageGris.size() * 3);
 
-    for (int i = 0; i < grayImage.size(); ++i) {
-        unsigned char intensity = grayImage[i];
+    for (size_t i = 0; i < imageGris.size(); ++i) {
+        unsigned char intensity = imageGris[i];
 
         if (intensity >= numColors) {
             throw std::runtime_error("le niveau de gris dépasse la plage de valeurs supportée par la LUT");
         }
 
-        int lutIndex = intensity * 3;
+        size_t lutIndex = intensity * 3;
 
-        coloredImage[3 * i + 0] = lut[lutIndex + 0]; // R
-        coloredImage[3 * i + 1] = lut[lutIndex + 1]; // G
-        coloredImage[3 * i + 2] = lut[lutIndex + 2]; // B
+        imageRGB[3 * i + 0] = lut[lutIndex + 0]; // R
+        imageRGB[3 * i + 1] = lut[lutIndex + 1]; // G
+        imageRGB[3 * i + 2] = lut[lutIndex + 2]; // B
     }
 
-    return coloredImage;
+    return imageRGB;
 }
 
 
 // Conversion de l'image
 template<typename SrcType, typename DstType>
 std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjustDynamics) {
-    std::vector<DstType> convertedImage(image.size());
+    std::vector<DstType> imageCnvert(image.size());
 
     SrcType minVal = *std::min_element(image.begin(), image.end());
     SrcType maxVal = *std::max_element(image.begin(), image.end());
 
-    for (int i = 0; i < image.size(); ++i) {
+    for (size_t i = 0; i < image.size(); ++i) {
         if (adjustDynamics) {
-            convertedImage[i] = static_cast<DstType>(
+            imageCnvert[i] = static_cast<DstType>(
                 ((image[i] - minVal) / static_cast<double>(maxVal - minVal)) * std::numeric_limits<DstType>::max()
             );
         } else {
-            convertedImage[i] = static_cast<DstType>(image[i]);
+            imageCnvert[i] = static_cast<DstType>(image[i]);
         }
     }
 
-    return convertedImage;
+    return imageCnvert;
 }
 
+
 template <typename T>
-std::vector<T> LectureImageRawRGB(const std::string& fichier, int width, int height, int cannaux, bool bigEndian = false) {
+std::vector<T> lectureImageRawRGB(const std::string& fichier, size_t largeur, size_t hauteur, size_t canaux, bool bigEndian = false) {
     static_assert(std::is_integral<T>::value, "T doit être un type entier");
-    std::ifstream testFile(fichier);
-    if (!testFile) {
-        std::cerr << "Le fichier n'existe pas ou le chemin est incorrect : " << fichier << '\n';
-    }
-    
+
     std::ifstream ifs(fichier, std::ios::binary);
-    std::vector<T> image(width * height * cannaux);
-
     if (!ifs) {
-        std::cerr << "Erreur ouverture RAW " << sizeof(T) * 8 << " bits.\n";
-        return image;
+        std::cerr << "Erreur : impossible d'ouvrir le fichier " << fichier << '\n';
+        return {};
     }
 
-    for (int i = 0; i < image.size(); ++i) {
-        uint8_t bytes[sizeof(T)];
-        ifs.read(reinterpret_cast<char*>(bytes), sizeof(T));
-        T value = 0;
-        if (bigEndian) {
-            for (int b = 0; b < sizeof(T); ++b)
-                value = (value << 8) | bytes[b];
-        } else {
-            for (int b = 0; b < sizeof(T); ++b)
-                value |= (static_cast<T>(bytes[b]) << (8 * b));
+    size_t taille = largeur * hauteur * canaux;
+    std::vector<T> image(taille);
+
+    for (size_t i = 0; i < taille; ++i) {
+        uint8_t octets[sizeof(T)];
+        ifs.read(reinterpret_cast<char*>(octets), sizeof(T));
+
+        if (ifs.gcount() != sizeof(T)) {
+            std::cerr << "Erreur : données incomplètes dans le fichier.\n";
+            return {};
         }
-        image[i] = value;
+
+        T valeur = 0;
+        if (bigEndian) {
+            for (size_t j = 0; j < sizeof(T); ++j) {
+                valeur = (valeur << 8) | octets[j];
+            }
+        } else {
+            for (size_t j = 0; j < sizeof(T); ++j) {
+                valeur |= (static_cast<T>(octets[j]) << (8 * j));
+            }
+        }
+
+        image[i] = valeur;
     }
 
     return image;
@@ -274,7 +275,7 @@ namespace v1_1{
     const std::vector<T>& getData() const;
     void setData(const std::vector<T>& image);
 
-    void creerImageBlache();
+    void creerImageBlanche();
     void creerSinusoidale(double frequence);
     void creerDamier(int tailleCase);
 
@@ -305,7 +306,7 @@ protected:
    
    
     template<typename T>
-    void Image<T>::creerImageBlache() {
+    void Image<T>::creerImageBlanche() {
         std::fill(_image.begin(), _image.end(), std::numeric_limits<T>::max());
     }
 
@@ -356,6 +357,7 @@ protected:
         ofs << "P5\n" << _largeur << " " << _hauteur << "\n255\n";
         ofs.write(reinterpret_cast<const char*>(_image.data()), _image.size());
     }
+    
     
     template<typename T>
     void Image<T>::ecrireFichierRaw(const std::string& fichier) const {
@@ -524,7 +526,7 @@ void ImageRGB::sauvegarderPPM(const std::string& fichier) const {
             // Pas besoin d'inverser l'endianess pour du uint8_t
             // Mais s’il y avait des uint16_t, oui
         
-            Image<uint8_t> imageRGB(largeur * 3, hauteur);  // Stocker R,G,B en colonnes consécutives
+            Image<uint8_t> imageRGB(largeur * 3, hauteur); 
             imageRGB.setData(buffer);
         
             return imageRGB;

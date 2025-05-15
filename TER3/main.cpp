@@ -41,7 +41,7 @@ case 1:{
     // 2.  sinusoïdale
     auto sinusImage = v1_0::SinusoidalImage<uint16_t>(Largeur, Hauteur, 8.0); 
     // savePGM16(sinusImage, Largeur, Hauteur, "C:\\Users\\lylehara\\Downloads\\TER\\imagesPGM\\sinusImage.pgm");
-    v1_0::EcritureImageRaw(sinusImage, ImageRaw + "sinus_image.raw");
+    v1_0::ecrireFichierRaw(sinusImage, ImageRaw + "sinus_image.raw");
     // 3. Damier
     auto DamierImage = v1_0::ImageDamier<uint8_t>(Largeur, Hauteur, 32); 
     v1_0::sauvegarderPGM(DamierImage, Largeur, Hauteur, imagePGM + "DamierImage.pgm");
@@ -53,8 +53,8 @@ case 1:{
     //afficher la matrice de l'image a la console 
     v1_0::printImage(DamierImage, 4, 3);
 
-    auto sinusImage_BE = v1_0::LecteurImageRAW<uint16_t>(ImageRaw + "sinus_image.raw", 256, 256, false); // Little Endian
-    auto sinusImage_LE = v1_0::LecteurImageRAW<uint16_t>(ImageRaw +"sinus_image.raw", 256, 256, true); // Big Endian
+    auto sinusImage_BE = v1_0::lireImageRAW<uint16_t>(ImageRaw + "sinus_image.raw", 256, 256, false); // Little Endian
+    auto sinusImage_LE = v1_0::lireImageRAW<uint16_t>(ImageRaw +"sinus_image.raw", 256, 256, true); // Big Endian
      
     auto sinusImage_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_BE, true);
     v1_0::sauvegarderPGM(sinusImage_BE_converte, Largeur, Hauteur, imagePGM + "sinusImage_BE_converte.pgm");
@@ -65,8 +65,8 @@ case 1:{
     // 1. Lecture de fichiers RAW (8 bits)
     //Lecture de fichiers RAW (8 bits) avec 1 canal (Niveau de gris) 
 
-    auto imageXR__femoral_BE = v1_0::LectureImageRawRGB<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, 1,false); // Big Endian
-    auto imageXR__femoral_LE = v1_0::LectureImageRawRGB<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512,1, true); // Big Endian
+    auto imageXR__femoral_BE = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, 1,false); // Big Endian
+    auto imageXR__femoral_LE = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512,1, true); // Big Endian
     
    // 2. Sauvegarde des fichiers RAW 8 bits en images PGM en niveaux de gris
     v1_0::sauvegarderPGM(imageXR__femoral_BE, 512, 512, imagePGM+"XR_8_bits_512x512_femoral_BE.pgm");
@@ -75,9 +75,9 @@ case 1:{
   
    //changement de la dynamique de lUT
 
-    auto lut1 = v1_0::ChargerLUT(lutPath + "000-gray.lut");
-    auto lut2 = v1_0::ChargerLUT(lutPath + "001-fire.lut");
-    auto lut3 = v1_0::ChargerLUT(lutPath + "002-spectrum.lut");
+    auto lut1 = v1_0::chargerLUT(lutPath + "000-gray.lut");
+    auto lut2 = v1_0::chargerLUT(lutPath + "001-fire.lut");
+    auto lut3 = v1_0::chargerLUT(lutPath + "002-spectrum.lut");
 
    //  // 4. Application de la LUT sur les images
    // image 1 => imageXR__femoral_BE
@@ -106,7 +106,7 @@ size_t Largeur = 256, Hauteur = 256;
 v1_1::Image<uint8_t> imageBlanche(Largeur, Hauteur);
 imageBlanche.creerImageBlache();
 imageBlanche.ecrireFichierRaw("ImageBlanche.raw");
-imageBlanche.sauvegarderPGM( imagePGM+ "ImageBlanche.pgm");
+imageBlanche.sauvegarderPGM( imagePGM+"ImageBlanche.pgm");
 
 v1_1::Image<uint8_t> imageDamier(Largeur, Hauteur);
 imageDamier.creerDamier(64);
