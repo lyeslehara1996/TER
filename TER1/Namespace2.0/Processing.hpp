@@ -6,6 +6,8 @@
 #include <memory>
 
 namespace v2_0 {
+
+
 template<typename T>
 class Processing1 {
 public:
@@ -31,6 +33,7 @@ public:
 
     // Méthode qui déclenche le traitement
     void Update(const Image<T>& input1, const Image<T>& input2, bool inPlace = false) ;
+    
     // Accès à l'image de sortie
     const Image<T>& getOutput() const ;
 

@@ -1,16 +1,4 @@
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <math.h>
-#include <cstdint>
-#include <cmath> 
-#include <limits>
-#include <iomanip> 
-#include <algorithm>
-#include <filesystem>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+
 
 #include <vector>
 #include <iostream>
@@ -550,5 +538,249 @@ void ImageRGB::sauvegarderPPM(const std::string& fichier) const {
         }
     }
 namespace v2_0 {
+
+    // Processing1 : pour une seule image en entrée
+    template<typename T>
+    class Processing1 {
+    public:
+        Processing1(v1_1::Image<T>& input, bool inPlace = false);
+
+        virtual void Process() = 0;
+
+        void Update();
+
+        v1_1::Image<T>& getOutput();
+
+    protected:
+        v1_1::Image<T>& imageInput_;
+        v1_1::Image<T> imageOutput_;
+        bool inPlace_;
+    };
+
+    // Processing2 : pour deux images en entrée
+    template<typename T>
+    class Processing2 {
+    public:
+        Processing2(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace = false);
+
+        virtual void Process() = 0;
+
+        void Update();
+
+        v1_1::Image<T>& getOutput();
+
+    protected:
+        v1_1::Image<T>& imageInput1_;
+        v1_1::Image<T>& imageInput2_;
+        v1_1::Image<T> imageOutput_;
+        bool inPlace_;
+    };
+
+    // Addition avec un scalaire
+    template<typename T>
+    class AdditionScalar : public Processing1<T> {
+    public:
+        AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace = false);
+
+        void Process() override;
+
+    private:
+        T valScalar_;
+    };
+
+
+
+    // Addition de deux images
+    template<typename T>
+    class Addition : public Processing2<T> {
+    public:
+        Addition(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace = false);
+
+        void Process() override;
+
+        // Méthode statique utilitaire pour addition sans créer d'objet
+        static v1_1::Image<T> addition(const v1_1::Image<T>& imageInput1, const v1_1::Image<T>& imageInput2);
+    };
+
+    template<typename T>
+    v1_1::Image<T> additionScalar(const v1_1::Image<T>& input, T valScalar);
+
+    // ----------------- Implémentations -----------------
+
+    // Processing1
+    template<typename T>
+    Processing1<T>::Processing1(v1_1::Image<T>& input, bool inPlace)
+        : imageInput_(input), inPlace_(inPlace), imageOutput_(input.getlargeur(), input.gethauteur()) {}
+
+    template<typename T>
+    void Processing1<T>::Update() {
+        Process();
+    }
+
+    template<typename T>
+    v1_1::Image<T>& Processing1<T>::getOutput() {
+        return inPlace_ ? imageInput_ : imageOutput_;
+    }
+
+    // Processing2
+    template<typename T>
+    Processing2<T>::Processing2(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace)
+        : imageInput1_(input1), imageInput2_(input2), inPlace_(inPlace),
+          imageOutput_(input1.getlargeur(), input1.gethauteur()) {}
+
+    template<typename T>
+    void Processing2<T>::Update() {
+        Process();
+    }
+
+    template<typename T>
+    v1_1::Image<T>& Processing2<T>::getOutput() {
+        return inPlace_ ? imageInput1_ : imageOutput_;
+    }
+
+    // Addition
+    template<typename T>
+    Addition<T>::Addition(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace)
+        : Processing2<T>(input1, input2, inPlace) {}
+
+    template<typename T>
+    void Addition<T>::Process() {
+        size_t largeur = this->imageInput1_.getlargeur();
+        size_t hauteur = this->imageInput1_.gethauteur();
+        v1_1::Image<T>& imageSortie = this->inPlace_ ? this->imageInput1_ : this->imageOutput_;
+
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                imageSortie(x, y) = this->imageInput1_(x, y) + this->imageInput2_(x, y);
+            }
+        }
+    }
+
+    template<typename T>
+    v1_1::Image<T> Addition<T>::addition(const v1_1::Image<T>& imageInput1, const v1_1::Image<T>& imageInput2) {
+        size_t largeur = imageInput1.getlargeur();
+        size_t hauteur = imageInput1.gethauteur();
+        v1_1::Image<T> imageOutput(largeur, hauteur);
+
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                imageOutput(x, y) = imageInput1(x, y) + imageInput2(x, y);
+            }
+        }
+
+        return imageOutput;
+    }
+
+    // AdditionScalar
+    template<typename T>
+    AdditionScalar<T>::AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace)
+        : Processing1<T>(input, inPlace), valScalar_(valScalar) {}
+
+    template<typename T>
+    void AdditionScalar<T>::Process() {
+        size_t largeur = this->imageInput_.getlargeur();
+        size_t hauteur = this->imageInput_.gethauteur();
+        v1_1::Image<T>& imageSortie = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
+
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                imageSortie(x, y) = this->imageInput_(x, y) + valScalar_;
+            }
+        }
+    }
+
+    // Fonction libre additionScalar
+    template<typename T>
+    v1_1::Image<T> additionScalar(const v1_1::Image<T>& input, T valScalar) {
+        size_t largeur = input.getlargeur();
+        size_t hauteur = input.gethauteur();
+        v1_1::Image<T> output(largeur, hauteur);
+
+        for (size_t y = 0; y < hauteur; ++y) {
+            for (size_t x = 0; x < largeur; ++x) {
+                output(x, y) = input(x, y) + valScalar;
+            }
+        }
+
+        return output;
+    }
+
+
+    // Égalisation d'histogramme
+template<typename T>
+class HistogramEqualization : public Processing1<T> {
+public:
+    HistogramEqualization(v1_1::Image<T>& input, bool inPlace = false);
+
+    void Process() override;
+
+    // Génère une image d'histogramme depuis l'entrée originale
+    v1_1::Image<uint8_t> getHistogramImage();
+
+private:
+    std::vector<int> histogramImage_;  // pour getHistogramImage()
+};
+
+// HistogramEqualization
+template<typename T>
+HistogramEqualization<T>::HistogramEqualization(v1_1::Image<T>& input, bool inPlace)
+    : Processing1<T>(input, inPlace) {}
+
+template<typename T>
+void HistogramEqualization<T>::Process() {
+    static_assert(std::is_same<T, uint8_t>::value, "HistogramEqualization ne supporte que uint8_t");
+
+    size_t w = this->imageInput_.getLargeur();
+    size_t h = this->imageInput_.getHauteur();
+    size_t total = w * h;
+
+    v1_1::Image<T>& output = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
+    output = v1_1::Image<T>(w, h);
+
+    // 1. Histogramme
+    histogramImage_ = std::vector<int>(256, 0);
+    for (auto val : this->imageInput_.getPixels()) {
+        histogramImage_[val]++;
+    }
+
+    // 2. CDF
+    std::vector<int> cdf(256);
+    cdf[0] = histogramImage_[0];
+    for (int i = 1; i < 256; ++i)
+        cdf[i] = cdf[i - 1] + histogramImage_[i];
+
+    // 3. LUT
+    std::vector<uint8_t> lut(256);
+    for (int i = 0; i < 256; ++i)
+        lut[i] = static_cast<uint8_t>(255.0 * cdf[i] / total);
+
+    // 4. Appliquer LUT
+    for (size_t y = 0; y < h; ++y)
+        for (size_t x = 0; x < w; ++x)
+            output(x, y) = lut[this->imageInput_(x, y)];
+}
+
+template<typename T>
+v1_1::Image<uint8_t> HistogramEqualization<T>::getHistogramImage() {
+    const int histWidth = 256;
+    const int histHeight = 100;
+    v1_1::Image<uint8_t> histImage(histWidth, histHeight);
+
+    if (histogramImage_.empty())
+        return histImage; // retour vide si pas encore calculé
+
+    int maxVal = *std::max_element(histogramImage_.begin(), histogramImage_.end());
+
+    for (int x = 0; x < histWidth; ++x) {
+        int barHeight = static_cast<int>((histogramImage_[x] / static_cast<float>(maxVal)) * histHeight);
+        for (int y = histHeight - 1; y >= histHeight - barHeight; --y) {
+            histImage(x, y) = 255;
+        }
+    }
+
+    return histImage;
+}
+
+
 
 }
