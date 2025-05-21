@@ -51,28 +51,28 @@ case 1:{
     v1_0::sauvegarderPPM(rgbImage, Largeur, Hauteur, imagePGM + "rgbImage.ppm");
    
     //afficher la matrice de l'image a la console 
-    v1_0::printImage(DamierImage, 4, 3);
-
+    
     auto sinusImage_BE = v1_0::lireImageRAW<uint16_t>(ImageRaw + "sinus_image.raw", 256, 256, false); // Little Endian
     auto sinusImage_LE = v1_0::lireImageRAW<uint16_t>(ImageRaw +"sinus_image.raw", 256, 256, true); // Big Endian
-     
+    
     auto sinusImage_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_BE, true);
     v1_0::sauvegarderPGM(sinusImage_BE_converte, Largeur, Hauteur, imagePGM + "sinusImage_BE_converte.pgm");
     auto sinusImage_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_LE, true);
     v1_0::sauvegarderPGM(sinusImage_LE_converte, Largeur, Hauteur, imagePGM + "sinusImage_LE_converte.pgm");
- 
-   
+    
+    
     // 1. Lecture de fichiers RAW (8 bits)
     //Lecture de fichiers RAW (8 bits) avec 1 canal (Niveau de gris) 
-
+    
     auto imageXR__femoral_BE = v1_0::lireImageRAW<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512,false); // Big Endian
     auto imageXR__femoral_LE = v1_0::lireImageRAW<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, true); // Big Endian
     
-
+    
     
     auto IRM_RGB_crane_RGB_BE = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256,3,false); // Big Endian
     auto IRM_RGB_crane_RGB_LE = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, 3,true); // Big Endian
     
+    v1_0::printImage(IRM_RGB_crane_RGB_LE, 50, 50);
     //convertir en niveau de gris 
     auto IRM_RGB_crane_BE = v1_0::convertRGB_Gris(IRM_RGB_crane_RGB_BE, 256,256);
     auto IRM_RGB_crane_LE = v1_0::convertRGB_Gris(IRM_RGB_crane_RGB_LE, 256,256);
@@ -220,9 +220,10 @@ std::cout << "Namespace 2.0 sélectionné\n";
 
 v1_1::Image<uint8_t> imageBlanche(256, 256);
 imageBlanche.creerImageBlache();
-
+imageBlanche.sauvegarderPGM("imageBlanche.pgm");
 v1_1::Image<uint8_t> imageSinus(256, 256);
-imageSinus.creerSinusoidale(25);
+imageSinus.creerSinusoidale(3);
+imageSinus.sauvegarderPGM("imageSinusoidale.pgm");
 
 
 v1_1::Image<uint8_t> imageDamier(256, 256);
@@ -231,8 +232,73 @@ imageDamier.creerDamier(64);
   v1_1::Image<uint8_t> result1(256, 256);
 
   result1 = v2_0::Addition<uint8_t>::addition(imageSinus, imageDamier);
+  result1.sauvegarderPGM("result1.pgm");
 
-result1.sauvegarderPGM("result1.pgm");
+  auto XR_femoral_BE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, false);
+  auto XR_femoral_LE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, true);
+ 
+  XR_femoral_BE.sauvegarderPGM( imagePGM+"XR_femoral_BE.pgm");
+  XR_femoral_LE.sauvegarderPGM( imagePGM+"XR_femoral_LE.pgm");
+
+
+
+// 3. Appliquer égalisation histogramme sur imageDamier
+v2_0::HistogramEqualization<uint8_t> heq(imageSinus);
+heq.Update();  // égalisation exécutée
+
+
+v2_0::HistogramEqualization<uint8_t> hist(XR_femoral_BE);
+hist.Update();  // égalisation exécutée
+
+// 4. Récupérer l’image égalisée
+auto imageEqualized = heq.getOutput();
+imageEqualized.sauvegarderPGM("egalisee.pgm");
+
+auto imageEqualized2 = hist.getOutput();
+imageEqualized2.sauvegarderPGM("egalisee2.pgm");
+
+
+// 5. Générer et sauvegarder l’histogramme de l’image égalisée
+auto histoImage = heq.getHistogramImage();  //
+histoImage.sauvegarderPGM("imageSinus.pgm");
+
+auto histoImage2 = hist.getHistogramImage(); 
+histoImage2.sauvegarderPGM("imageEqualized2.pgm");
+
+
+auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(3);
+auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(5, 1.0f);
+auto expo =v2_0:: Convolution<uint8_t>::createExponentiel(5, 0.8f);
+v2_0::Convolution<uint8_t> filtreGaussien(XR_femoral_BE, gaussien);
+v2_0::Convolution<uint8_t> filtreMoyenneur(XR_femoral_BE, moyenneur);
+v2_0::Convolution<uint8_t> filtreExpo(XR_femoral_BE, expo);
+filtreGaussien.Process();
+
+auto output = filtreGaussien.getOutput();
+output.sauvegarderPGM("image_filtrée_gaussien.pgm");
+
+filtreMoyenneur.Process();
+
+auto outputImage = filtreMoyenneur.getOutput();
+outputImage.sauvegarderPGM("image_filtrée_moyeneur.pgm");
+
+
+filtreExpo.Process();
+
+auto outputImage2 = filtreExpo.getOutput();
+outputImage2.sauvegarderPGM("image_filtrée_expo.pgm");
+
+// Créer l'image et le filtre
+auto filtre = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreButterworth(512  , 512, 30.0f, 2);
+v2_0::FiltrageFrequenciel<uint8_t> filtrage(XR_femoral_BE, filtre);
+filtrage.Update();
+
+v1_1::Image<uint8_t> imageFiltrée = filtrage.getOutput();
+imageFiltrée.sauvegarderPGM("image_filtrée.pgm");
+
+
+
+
 break; 
 }
 

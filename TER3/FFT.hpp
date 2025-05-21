@@ -1,3 +1,6 @@
+#ifndef FFT_HPP
+#define FFT_HPP
+
 #include "namespace.hpp"
 
 template<typename T>
@@ -88,20 +91,20 @@ void fourn(double* data,int* nn,int ndim,int isign)
 template<typename T>
 void directFFT(const v1_1::Image<T>& realIn, const v1_1::Image<T>& imagIn, v1_1::Image<T>& realOut, v1_1::Image<T>& imagOut)
 {
-	int NN[3] = { 0, realIn.getWidth(), realIn.getHeight() };
+	int NN[3] = { 0, realIn.getlargeur(), realIn.gethauteur() };
 	int dim = NN[1] * NN[2], n = 2;
 
 	double * tmp = new double[2 * dim + 1];
 	
 	// Real image filling
 	int k = 0;
-	for (int i{ 0 }; i < realIn.getWidth(); ++i)
-		for (int j{ 0 }; j < realIn.getHeight(); ++j)
+	for (int i{ 0 }; i < realIn.getlargeur(); ++i)
+		for (int j{ 0 }; j < realIn.gethauteur(); ++j)
 			tmp[++k] = realIn(i, j);
 
 	// Imaginary image filling
-	for (int i{ 0 }; i < realIn.getWidth(); ++i)
-		for (int j{ 0 }; j < realIn.getHeight(); ++j)
+	for (int i{ 0 }; i < realIn.getlargeur(); ++i)
+		for (int j{ 0 }; j < realIn.gethauteur(); ++j)
 			tmp[++k] = imagIn(i, j);
 
 	// Direct Fourier Transform
@@ -127,7 +130,7 @@ void directFFT(const v1_1::Image<T>& realIn, const v1_1::Image<T>& imagIn, v1_1:
 template<typename T>
 void inverseFFT(const v1_1::Image<T>& realIn, const v1_1::Image<T>& imagIn, v1_1::Image<T>& realOut, v1_1::Image<T>& imagOut)
 {
-	int NN[3] = { 0, realIn.getWidth(), realIn.getHeight() };
+	int NN[3] = { 0, realIn.getlargeur(), realIn.gethauteur() };
 	int dim = NN[1] * NN[2], n = 2;
 
 	double * tmp = new double[2 * dim + 1];
@@ -146,14 +149,17 @@ void inverseFFT(const v1_1::Image<T>& realIn, const v1_1::Image<T>& imagIn, v1_1
 
 	// Filling of real image
 	int k = 0;
-	for (int i{ 0 }; i < realOut.getWidth(); ++i)
-		for (int j{ 0 }; j < realOut.getHeight(); ++j)
+	for (int i{ 0 }; i < realOut.getlargeur(); ++i)
+		for (int j{ 0 }; j < realOut.gethauteur(); ++j)
 			realOut(i, j) = static_cast<T>(tmp[++k]);
 
 	// Filling of imaginary image
-	for (int i{ 0 }; i < imagOut.getWidth(); ++i)
-		for (int j{ 0 }; j < imagOut.getHeight(); ++j)
+	for (int i{ 0 }; i < imagOut.getlargeur(); ++i)
+		for (int j{ 0 }; j < imagOut.gethauteur(); ++j)
 			imagOut(i, j) = static_cast<T>(tmp[++k]);
 
 	delete [] tmp;
 }
+
+
+#endif

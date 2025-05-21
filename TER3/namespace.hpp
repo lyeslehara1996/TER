@@ -1,14 +1,15 @@
 
+#ifndef NAMESPACE_HPP
+#define NAMESPACE_HPP
 
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <math.h>
-#include <cstdint>
-#include <cmath> 
-#include <limits>
-#include <iomanip> 
-#include <algorithm>
+#include <vector>           //Fournit la classe std::vector, un tableau dynamique (taille ajustable automatiquement) 
+#include <iostream>         //Permet l’entrée/sortie via la console.  //Fournit std::cout, std::cin, std::endl
+#include <fstream>          //  Sert à faire de l’entrée/sortie sur fichiers. // Fournit std::ifstream (lecture) et std::ofstream (écriture).
+#include <math.h>           // Fournit les fonctions mathématiques classiques (sin, cos, sqrt, etc.)
+#include <cstdint>          // Fournit les types d'entiers à taille fixe, uint8_t (8 bits), int16_t (16 bits) 
+#include <limits>           // Fournit des infos sur les valeurs extrêmes des types (min, max, epsilon)
+#include <iomanip>          //Permet de formater l'affichage (alignement, précision, )
+#include <algorithm>            //Fournit des algorithmes standard std::sort, std::min_element, std::max, std::copy
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -23,21 +24,25 @@ namespace v1_0 {
 
     // Image blanche
     template <typename T>
-    std::vector<T> ImageBlanche(size_t largeur, size_t hauteur) {
-        return std::vector<T>(largeur * hauteur, std::numeric_limits<T>::max());
+    std::vector<T> ImageBlanche(size_t largeur, size_t hauteur) { // size_t : est un type entier comme nt mais non signé elle accepte pas des valeurs négatives 
+        return std::vector<T>(largeur * hauteur, std::numeric_limits<T>::max()); // etourne la plus grande valeur possible que peut prendre un type numérique T 
+        //                                                                        //  exemple :  Max int: 2147483647 ,  Max unsigned char: 255
     }
 
     // Mire sinusoïdale
     template <typename T>
     std::vector<T> SinusoidalImage(size_t largeur, size_t hauteur, double frequence) {
-        std::vector<T> image(largeur * hauteur);
+        std::vector<T> image(largeur * hauteur); //Allocation de l'image
 
+//On parcourt l’image ligne par ligne, pixel par pixel
         for (size_t y = 0; y < hauteur; ++y) {
             for (size_t x = 0; x < largeur; ++x) {
-                double valeur = std::sin(2 * M_PI * frequence * x / largeur);
-                double Valnormaliser = (valeur + 1.0) * 0.5; // normaliser en 0 et 1 
-                image[y * largeur + x] = static_cast<T>(Valnormaliser * std::numeric_limits<T>::max());
-            }
+                double valeur = std::sin(2 * M_PI * frequence * x / largeur); //C’est pour normaliser la position x entre 0 et 1 si x= 0 et largeur 100 => x/largeur 0.0 , si x= 50 donc x/largeur = 0.5, 
+                double Valnormaliser = (valeur + 1.0) * 0.5; // normaliser en 0 et 1 car le Le sinus donne des valeurs entre -1 et 1 
+                                                              //mais on veut pas de négative donc En ajoutant 1, on obtient : 0 à 2
+                                                              //En multipliant par 0.5, on obtient : 0 à 1  
+                image[y * largeur + x] = static_cast<T>(Valnormaliser * std::numeric_limits<T>::max()); // on transforme notre valeur entre 0 et 1 en une valeur réelle de pixel.
+            }                                                                                           // exemple 0.2 * 255 = 51 , 1 =255 , 0.5 =
         }
         return image;
     }
@@ -49,17 +54,25 @@ namespace v1_0 {
 
         for (size_t y = 0; y < hauteur; ++y) {
             for (size_t x = 0; x < largeur; ++x) {
-                bool estBlanc = ((x / tailleCase) % 2 == (y / tailleCase) % 2);
+                bool estBlanc = ((x / tailleCase) % 2 == (y / tailleCase) % 2); //si l'indice x / taille de la case modulo 2 == a l'indice y / taille de case  modulo 2 donc la case est blanc 
                 image[y * largeur + x] = estBlanc ? std::numeric_limits<T>::max() : 0;
             }
         }
         return image;
     }
 
-    // Sauvegarde en PGM (grayscale)
+    // Sauvegarde en PGM sauvegarde une image en niveaux de gris
     void sauvegarderPGM(const std::vector<uint8_t>& image, size_t largeur, size_t hauteur, const std::string& fichier) {
-        std::ofstream ofs(fichier, std::ios::binary);
+        //sortie vers un fichier ( file stream)
+        //Par défaut, C++ écrit en mode texte. Pour ne pas perdre d'information lors de l'interpretation 
+        //Les octets peuvent être modifiés automatiquement (ex : \n devient \r\n sous Windows)
+        std::ofstream ofs(fichier, std::ios::binary);//Spécifie qu’on écrit en mode binaire (pas texte)
+
+          //P5 en tete de fichier PGM (en niveau de gris )dans le fichier binaire et dans le fichier text c'est P2
+        //donc le fichier PGM contient ces information : en_tete = P6 ou P2 les dimension de l image(fichier) hauteur et largeur 
         ofs << "P5\n" << largeur << " " << hauteur << "\n255\n";
+
+        //changement de type de pointeur, sans modifier les données. car std::ofstream::write() attend un const char* mais on const uint8_t* Donc  uint8_t* → char* 
         ofs.write(reinterpret_cast<const char*>(image.data()), image.size());
     }
    
@@ -76,7 +89,7 @@ namespace v1_0 {
         return imageRGB;
     }
     
-    void sauvegarderPPM(const std::vector<unsigned char>& image, int largeur, int hauteur, const std::string& fichier) {
+    void sauvegarderPPM(const std::vector<uint8_t>& image, int largeur, int hauteur, const std::string& fichier) {
         std::ofstream file(fichier, std::ios::binary);
         if (!file) {
             std::cerr << "Erreur : impossible de créer le fichier " << fichier << std::endl;
@@ -84,6 +97,7 @@ namespace v1_0 {
         }
     
         // Écrire l'en-tête du fichier PPM
+      
         file << "P6\n" << largeur << " " << hauteur << "\n255\n";
     
         // Écrire les données de l'image (R, G, B)
@@ -107,7 +121,7 @@ namespace v1_0 {
      et le codage little endian (le plus répandu pour les images codées sur plusieurs octets). 
     */
     
-
+//   Fichier brut, sans en-tête, sans information de dimensions, juste des données brutes //L’ordinateur ne peut pas deviner la taille ou les canaux : tu dois la spécifier toi-même
     template<typename T>
     std::vector<T> lireImageRAW(const std::string& nomFichier, int largeur, int hauteur,bool bigEndian = false) {
         std::ifstream in(nomFichier, std::ios::binary);
@@ -115,11 +129,13 @@ namespace v1_0 {
 
         size_t nbPixels = largeur * hauteur;
        std::vector<T> img(nbPixels);
-        in.read(reinterpret_cast<char*>(img.data()), nbPixels * sizeof(T));
+       //reinterpret_cast<char*> → C++ veut des char* pour lire des octets
+        in.read(reinterpret_cast<char*>(img.data()), nbPixels * sizeof(T)); //nbPixels * sizeof(T) → taille totale des données à lire en octets // Si T = uint8_t → lecture de 1 octet par pixel, Si T = uint16_t → lecture de 2 octets par pixel
 
+        //LE big ou Little endiane  Uniquement utile si les pixels sont codés sur plusieurs octets (ex: uint16_t, float)
         if (bigEndian && sizeof(T) > 1) {
             for (T& pixel : img) {
-                uint8_t* ptr = reinterpret_cast<uint8_t*>(&pixel);
+                uint8_t* ptr = reinterpret_cast<uint8_t*>(&pixel); //on transforme cette adresse en tableau d’octets
                 std::reverse(ptr, ptr + sizeof(T));
             }
         }
@@ -160,16 +176,16 @@ std::vector<uint8_t> convertRGB_Gris(const std::vector<uint8_t>& rgbImage, size_
 }
 
 
-std::vector<unsigned char> applLUT(const std::vector<unsigned char>& imageGris, const std::vector<unsigned char>& lut) {
+std::vector<uint8_t> applLUT(const std::vector<uint8_t>& imageGris, const std::vector<uint8_t>& lut) {
     if (lut.size() % 3 != 0) {
         throw std::runtime_error("LUT doit contenir un multiple de 3 valeurs RGB.");
     }
 
     size_t numColors = lut.size() / 3;
-    std::vector<unsigned char> imageRGB(imageGris.size() * 3);
+    std::vector<uint8_t> imageRGB(imageGris.size() * 3);
 
     for (size_t i = 0; i < imageGris.size(); ++i) {
-        unsigned char intensity = imageGris[i];
+        uint8_t intensity = imageGris[i];
 
         if (intensity >= numColors) {
             throw std::runtime_error("le niveau de gris dépasse la plage de valeurs supportée par la LUT");
@@ -538,7 +554,7 @@ void ImageRGB::sauvegarderPPM(const std::string& fichier) const {
         }
     }
 namespace v2_0 {
-
+#include "FFT.hpp"
     // Processing1 : pour une seule image en entrée
     template<typename T>
     class Processing1 {
@@ -706,9 +722,9 @@ namespace v2_0 {
     }
 
 
-    // Égalisation d'histogramme
+    // la class Égalisation d'histogramme
 template<typename T>
-class HistogramEqualization : public Processing1<T> {
+class HistogramEqualization : public Processing1<T> {   
 public:
     HistogramEqualization(v1_1::Image<T>& input, bool inPlace = false);
 
@@ -730,8 +746,8 @@ template<typename T>
 void HistogramEqualization<T>::Process() {
     static_assert(std::is_same<T, uint8_t>::value, "HistogramEqualization ne supporte que uint8_t");
 
-    size_t w = this->imageInput_.getLargeur();
-    size_t h = this->imageInput_.getHauteur();
+    size_t w = this->imageInput_.getlargeur();
+    size_t h = this->imageInput_.gethauteur();
     size_t total = w * h;
 
     v1_1::Image<T>& output = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
@@ -739,7 +755,7 @@ void HistogramEqualization<T>::Process() {
 
     // 1. Histogramme
     histogramImage_ = std::vector<int>(256, 0);
-    for (auto val : this->imageInput_.getPixels()) {
+    for (auto val : this->imageInput_.getData()) {
         histogramImage_[val]++;
     }
 
@@ -762,25 +778,218 @@ void HistogramEqualization<T>::Process() {
 
 template<typename T>
 v1_1::Image<uint8_t> HistogramEqualization<T>::getHistogramImage() {
-    const int histWidth = 256;
-    const int histHeight = 100;
-    v1_1::Image<uint8_t> histImage(histWidth, histHeight);
+    const int histlargeur = 256;
+    const int histhauteur = 100;
+
+    v1_1::Image<uint8_t> histImage(histlargeur, histhauteur);
+
+    // Fond blanc
+    for (int y = 0; y < histhauteur; ++y)
+        for (int x = 0; x < histlargeur; ++x)
+            histImage(x, y) = 255;
 
     if (histogramImage_.empty())
-        return histImage; // retour vide si pas encore calculé
+        return histImage;
 
+    // Trouver le max pour normalisation
     int maxVal = *std::max_element(histogramImage_.begin(), histogramImage_.end());
+    if (maxVal == 0) return histImage;
 
-    for (int x = 0; x < histWidth; ++x) {
-        int barHeight = static_cast<int>((histogramImage_[x] / static_cast<float>(maxVal)) * histHeight);
-        for (int y = histHeight - 1; y >= histHeight - barHeight; --y) {
-            histImage(x, y) = 255;
+    // Tracer les barres noires (histogramme)
+    for (int x = 0; x < histlargeur; ++x) {
+        int barreHauteur = static_cast<int>((histogramImage_[x] / static_cast<float>(maxVal)) * histhauteur);
+
+        // Dessiner de bas en haut
+        for (int y = histhauteur - 1; y >= histhauteur - barreHauteur; --y) {
+            histImage(x, y) = 0;  // noir
         }
     }
 
     return histImage;
 }
 
+// La class Convolutuion 
+
+template<typename T>
+class Convolution : public Processing1<T> {
+public:
+    Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& kernel, bool inPlace = false);
+
+    void Process() override;
+
+    static v1_1::Image<float> createMoyenneur(int taille);
+    static v1_1::Image<float> createGaussien(int taille, float sigma);
+    static v1_1::Image<float> createExponentiel(int taille, float lambda);
+
+private:
+    v1_1::Image<float> kernel_;
+};
+
+// Constructeur
+template<typename T>
+Convolution<T>::Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& kernel, bool inPlace)
+    : Processing1<T>(image, inPlace), kernel_(kernel) {}
+
+// Processus de convolution
+template<typename T>
+void Convolution<T>::Process() {
+    int w = this->imageInput_.getlargeur();
+    int h = this->imageInput_.gethauteur();
+    int kw = kernel_.getlargeur();
+    int kh = kernel_.gethauteur();
+    int dx = kw / 2;
+    int dy = kh / 2;
+
+    v1_1::Image<T>& out = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
+    out = v1_1::Image<T>(w, h);
+
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            float sum = 0.0f;
+            for (int j = 0; j < kh; ++j) {
+                for (int i = 0; i < kw; ++i) {
+                    int ix = std::clamp(x + i - dx, 0, w - 1);
+                    int iy = std::clamp(y + j - dy, 0, h - 1);
+                    sum += this->imageInput_(ix, iy) * kernel_(i, j);
+                }
+            }
+            out(x, y) = static_cast<T>(std::clamp(sum, 0.0f, 255.0f));
+        }
+    }
+}
+
+//Moyenneur
+template<typename T>
+v1_1::Image<float> Convolution<T>::createMoyenneur(int taille) {
+    v1_1::Image<float> kernel(taille, taille);
+    float val = 1.0f / (taille * taille);
+    for (int y = 0; y < taille; ++y)
+        for (int x = 0; x < taille; ++x)
+            kernel(x, y) = val;
+    return kernel;
+}
+
+//Gaussien 
+template<typename T>
+v1_1::Image<float> Convolution<T>::createGaussien(int taille, float sigma) {
+    v1_1::Image<float> kernel(taille, taille);
+    int c = taille / 2;
+    float sum = 0.0f;
+
+    for (int y = 0; y < taille; ++y) {
+        for (int x = 0; x < taille; ++x) {
+            float dx = x - c;
+            float dy = y - c;
+            float val = std::exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+            kernel(x, y) = val;
+            sum += val;
+        }
+    }
+
+    for (int y = 0; y < taille; ++y)
+        for (int x = 0; x < taille; ++x)
+            kernel(x, y) /= sum;
+
+    return kernel;
+}
+//Exponentiel 
+
+template<typename T>
+v1_1::Image<float> Convolution<T>::createExponentiel(int taille, float lambda) {
+    v1_1::Image<float> kernel(taille, taille);
+    int c = taille / 2;
+    float sum = 0.0f;
+
+    for (int y = 0; y < taille; ++y) {
+        for (int x = 0; x < taille; ++x) {
+            float dx = std::abs(x - c);
+            float dy = std::abs(y - c);
+            float val = std::exp(-lambda * (dx + dy));
+            kernel(x, y) = val;
+            sum += val;
+        }
+    }
+
+    for (int y = 0; y < taille; ++y)
+        for (int x = 0; x < taille; ++x)
+            kernel(x, y) /= sum;
+
+    return kernel;
+}
+
+//class 
+
+
+
+template<typename T>
+class FiltrageFrequenciel : public Processing2<T> {
+public:
+    FiltrageFrequenciel(v1_1::Image<T>& image, v1_1::Image<T>& filtre);
+
+    void Process() override;
+
+    static v1_1::Image<T> creerFiltreButterworth(int largeur, int hauteur, float d0, int ordre);
+};
+
+
+
+
+template<typename T>
+FiltrageFrequenciel<T>::FiltrageFrequenciel(v1_1::Image<T>& image, v1_1::Image<T>& filtre)
+    : Processing2<T>(image, filtre, false) {}
+
+template<typename T>
+void FiltrageFrequenciel<T>::Process() {
+    size_t w = this->imageInput1_.getlargeur();
+    size_t h = this->imageInput1_.gethauteur();
+
+    // Préparation FFT
+    v1_1::Image<T> realIn = this->imageInput1_;
+    v1_1::Image<T> imagIn(w, h); // imaginaire initialisé à 0
+    for (int y = 0; y < h; ++y)
+        for (int x = 0; x < w; ++x)
+            imagIn(x, y) = 0;
+
+    v1_1::Image<T> realF(w, h), imagF(w, h);
+
+    // FFT directe
+    directFFT(realIn, imagIn, realF, imagF);
+
+    // Multiplication dans le domaine fréquentiel
+    for (size_t y = 0; y < h; ++y) {
+        for (size_t x = 0; x < w; ++x) {
+            T H = this->imageInput2_(x, y); // filtre réel
+            realF(x, y) *= H;
+            imagF(x, y) *= H;
+        }
+    }
+
+    // FFT inverse
+    v1_1::Image<T> realOut(w, h), imagOut(w, h);
+    inverseFFT(realF, imagF, realOut, imagOut);
+
+    this->imageOutput_ = realOut;
+}
+
+template<typename T>
+v1_1::Image<T> FiltrageFrequenciel<T>::creerFiltreButterworth(int width, int height, float d0, int ordre) {
+    v1_1::Image<T> filtre(width, height);
+    int cx = width / 2;
+    int cy = height / 2;
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            float dx = x - cx;
+            float dy = y - cy;
+            float d = std::sqrt(dx * dx + dy * dy);
+            float val = 1.0f / (1.0f + std::pow(d / d0, 2 * ordre));
+            filtre(x, y) = static_cast<T>(val * 255); // Mise à l’échelle
+        }
+    }
+
+    return filtre;
+}
 
 
 }
+#endif
