@@ -510,6 +510,7 @@ int main(){
       //  // 5. Sauvegarde des images en couleur
       //  savePPM(imageXR__femoral_BE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\coeur_LE.ppm");
         savePPM(imageXR__femoral_BE_colored_1, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageXR__femoral_BE_colored\\imageXR__femoral_BE_colored_1.ppm");
+        savePPM(imageXR__femoral_BE_colored_1, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageXR__femoral_BE_colored\\imageXR__femoral_BE_colored_1.ppm");
         savePPM(imageXR__femoral_BE_colored_2, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageXR__femoral_BE_colored\\imageXR__femoral_BE_colored_2.ppm");
         savePPM(imageXR__femoral_BE_colored_3, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageXR__femoral_BE_colored\\imageXR__femoral_BE_colored_3.ppm");
         savePPM(imageXR__femoral_BE_colored_4, 512, 512, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\imageXR__femoral_BE_colored\\imageXR__femoral_BE_colored_4.ppm");

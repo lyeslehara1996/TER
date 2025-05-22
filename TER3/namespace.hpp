@@ -659,34 +659,50 @@ namespace v2_0 {
     Addition<T>::Addition(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace)
         : Processing2<T>(input1, input2, inPlace) {}
 
-    template<typename T>
-    void Addition<T>::Process() {
-        size_t largeur = this->imageInput1_.getlargeur();
-        size_t hauteur = this->imageInput1_.gethauteur();
-        v1_1::Image<T>& imageSortie = this->inPlace_ ? this->imageInput1_ : this->imageOutput_;
-
-        for (size_t y = 0; y < hauteur; ++y) {
-            for (size_t x = 0; x < largeur; ++x) {
-                imageSortie(x, y) = this->imageInput1_(x, y) + this->imageInput2_(x, y);
+        template<typename T>
+        void Addition<T>::Process() {
+            size_t largeur1 = this->imageInput1_.getlargeur();
+            size_t hauteur1 = this->imageInput1_.gethauteur();
+            size_t largeur2 = this->imageInput2_.getlargeur();
+            size_t hauteur2 = this->imageInput2_.gethauteur();
+        
+            size_t largeurFinale = largeur1;
+            size_t hauteurFinale = hauteur1;
+        
+            v1_1::Image<T> imageTemp(largeurFinale, hauteurFinale);
+        
+            for (size_t y = 0; y < hauteurFinale; ++y) {
+                for (size_t x = 0; x < largeurFinale; ++x) {
+                    T val1 = this->imageInput1_(x, y);
+                    if (x < largeur2 && y < hauteur2) {
+                        T val2 = this->imageInput2_(x, y);
+                        imageTemp(x, y) = val1 + val2;
+                    } else {
+                        imageTemp(x, y) = val1;
+                    }
+                }
+            }
+        
+            if (this->inPlace_) {
+                this->imageInput1_ = std::move(imageTemp);
+            } else {
+                this->imageOutput_ = std::move(imageTemp);
             }
         }
-    }
 
-    template<typename T>
-    v1_1::Image<T> Addition<T>::addition(const v1_1::Image<T>& imageInput1, const v1_1::Image<T>& imageInput2) {
-        size_t largeur = imageInput1.getlargeur();
-        size_t hauteur = imageInput1.gethauteur();
-        v1_1::Image<T> imageOutput(largeur, hauteur);
-
-        for (size_t y = 0; y < hauteur; ++y) {
-            for (size_t x = 0; x < largeur; ++x) {
-                imageOutput(x, y) = imageInput1(x, y) + imageInput2(x, y);
-            }
-        }
-
-        return imageOutput;
-    }
-
+     // Méthode statique addition
+  template<typename T>
+  v1_1::Image<T> Addition<T>::addition(const v1_1::Image<T>& image1, const v1_1::Image<T>& image2) {
+      // Création de copies modifiables
+      v1_1::Image<T> imgRef1 = image1;
+      v1_1::Image<T> imgRef2 = image2;
+  
+      // Création de l'opération sans passer de type (car comportement unique : étendre avec zéros)
+      Addition<T> add(imgRef1, imgRef2, false);
+      add.Update();
+  
+      return add.getOutput();
+  }
     // AdditionScalar
     template<typename T>
     AdditionScalar<T>::AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace)
@@ -848,12 +864,24 @@ void Convolution<T>::Process() {
             float sum = 0.0f;
             for (int j = 0; j < kh; ++j) {
                 for (int i = 0; i < kw; ++i) {
-                    int ix = std::clamp(x + i - dx, 0, w - 1);
-                    int iy = std::clamp(y + j - dy, 0, h - 1);
+                    int ix = x + i - dx;
+                    int iy = y + j - dy;
+
+                    // Gestion manuelle des bords (mirroring simple ici)
+                    if (ix < 0) ix = 0;
+                    if (ix >= w) ix = w - 1;
+                    if (iy < 0) iy = 0;
+                    if (iy >= h) iy = h - 1;
+
                     sum += this->imageInput_(ix, iy) * kernel_(i, j);
                 }
             }
-            out(x, y) = static_cast<T>(std::clamp(sum, 0.0f, 255.0f));
+
+            // Clamp manuel entre 0 et 255
+            if (sum < 0.0f) sum = 0.0f;
+            else if (sum > 255.0f) sum = 255.0f;
+
+            out(x, y) = static_cast<T>(sum);
         }
     }
 }

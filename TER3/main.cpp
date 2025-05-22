@@ -5,7 +5,7 @@
 
 
 int main(){
-    
+  try {
     const size_t Largeur = 256;
     const size_t Hauteur = 256;
 
@@ -14,7 +14,7 @@ int main(){
     
 
 
-    std::string ImageRaw= "images_Raw\\images\\" ;
+    std::string ImageRaw= "images RAW/images/" ;
     std::string imagePGM= "imagePGM/" ;
     std::string lutPath = "LUT/LUT/";
     std::string imageRGB = "imageRGB/";
@@ -22,10 +22,12 @@ int main(){
     
     int choix_namespace = -1;
 
-    std::cout << "Tapez 1 pour utiliser le namespace v1_0\n";
-    std::cout << "Tapez 2 pour utiliser le namespace v1_1\n";
-    std::cout << "Tapez 3 pour utiliser le namespace v1_1\n";
-    std::cout << "Tapez 0 pour quitter\n";
+    std::cout << "====== MENU ======\n";
+    std::cout << "1. Namespace v1_0\n";
+    std::cout << "2. Namespace v1_1\n";
+    std::cout << "3. Namespace v2_0\n";
+    std::cout << "0. Quitter\n";
+    std::cout << "Votre choix : ";
     std::cin >> choix_namespace;
 
 switch (choix_namespace) {
@@ -64,29 +66,32 @@ case 1:{
     // 1. Lecture de fichiers RAW (8 bits)
     //Lecture de fichiers RAW (8 bits) avec 1 canal (Niveau de gris) 
     
-    auto imageXR__femoral_BE = v1_0::lireImageRAW<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512,false); // Big Endian
-    auto imageXR__femoral_LE = v1_0::lireImageRAW<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, true); // Big Endian
+    auto TDM__crane_LE = v1_0::lireImageRAW<uint16_t>(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512,true); // Big Endian
+    auto TDM__crane_BE = v1_0::lireImageRAW<uint16_t>(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512,false); // Big Endian
     
+    auto imageXR__femoral = v1_0::lireImageRAW<uint8_t>(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512); // Big Endian
     
+    auto IRM_coeur = v1_0::lireImageRAW<uint8_t>(ImageRaw + "IRM_8_bits_256x256_coeur.raw", 256, 256); // Big Endian
     
-    auto IRM_RGB_crane_RGB_BE = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256,3,false); // Big Endian
-    auto IRM_RGB_crane_RGB_LE = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, 3,true); // Big Endian
-    
-    v1_0::printImage(IRM_RGB_crane_RGB_LE, 50, 50);
+    auto IRM_RGB_crane_RGB = v1_0::lectureImageRawRGB<uint8_t>(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256,3); // Big Endian
+   
     //convertir en niveau de gris 
-    auto IRM_RGB_crane_BE = v1_0::convertRGB_Gris(IRM_RGB_crane_RGB_BE, 256,256);
-    auto IRM_RGB_crane_LE = v1_0::convertRGB_Gris(IRM_RGB_crane_RGB_LE, 256,256);
+    auto IRM_RGB_crane = v1_0::convertRGB_Gris(IRM_RGB_crane_RGB, 256,256);
 
-    
+    //Covertir en uint8_t
+
+    auto TDM__crane_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(TDM__crane_LE, true);
+    auto TDM__crane_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(TDM__crane_BE, true);
+    v1_0::sauvegarderPGM(TDM__crane_LE_converte, 512, 512, imagePGM + "TDM__crane_LE_converte.pgm");
+    v1_0::sauvegarderPGM(TDM__crane_BE_converte, 512, 512, imagePGM + "TDM__crane_BE_converte.pgm");
     
     
     
     // 2. Sauvegarde des fichiers RAW 8 bits en images PGM en niveaux de gris
-    v1_0::sauvegarderPGM(imageXR__femoral_BE, 512, 512, imagePGM+"XR_8_bits_512x512_femoral_BE.pgm");
-    v1_0::sauvegarderPGM(imageXR__femoral_LE, 512, 512, imagePGM+"XR_8_bits_512x512_femoral_LE.pgm");
+    v1_0::sauvegarderPGM(imageXR__femoral, 512, 512, imagePGM+"XR_8_bits_512x512_femoral_BE.pgm");
+    v1_0::sauvegarderPGM(IRM_coeur, 256, 256, imagePGM+"IRM_8_bits_256x256_coeur.pgm");
     
-     v1_0::sauvegarderPGM(IRM_RGB_crane_BE, 256, 256, imagePGM+"IRM_RGB_crane_BE.pgm");
-     v1_0::sauvegarderPGM(IRM_RGB_crane_LE, 256, 256, imagePGM+"IRM_RGB_crane_LE.pgm");
+     v1_0::sauvegarderPGM(IRM_RGB_crane, 256, 256, imagePGM+"IRM_RGB_crane_BE.pgm");
   
    //changement de la dynamique de lUT
 
@@ -97,119 +102,114 @@ case 1:{
    //  // 4. Application de la LUT sur les images
    // image 1 => imageXR__femoral_BE
 
-    auto imageXR__femoral_BE_RGB_1 = v1_0::applLUT(imageXR__femoral_BE, lut1);
-    auto imageXR__femoral_BE_RGB_2 = v1_0::applLUT(imageXR__femoral_BE, lut2);
-    auto imageXR__femoral_BE_RGB_3 = v1_0::applLUT(imageXR__femoral_BE, lut3);
+    auto imageXR__femoral_RGB_1 = v1_0::applLUT(imageXR__femoral, lut1);
+    auto imageXR__femoral_RGB_2 = v1_0::applLUT(imageXR__femoral, lut2);
+    auto imageXR__femoral_RGB_3 = v1_0::applLUT(imageXR__femoral, lut3);
 
-    auto IRM_RGB_crane_BE_RGB1 = v1_0::applLUT(IRM_RGB_crane_BE, lut1);
-    auto IRM_RGB_crane_BE_RGB2 = v1_0::applLUT(IRM_RGB_crane_BE, lut2);
-    auto IRM_RGB_crane_LE_RGB1 = v1_0::applLUT(IRM_RGB_crane_LE, lut1);
-    auto IRM_RGB_crane_LE_RGB2 = v1_0::applLUT(IRM_RGB_crane_LE, lut2);
+    auto IRM_coeur_RGB_1 = v1_0::applLUT(IRM_coeur, lut1);
+    auto IRM_coeur_RGB_2 = v1_0::applLUT(IRM_coeur, lut2);
+    auto IRM_coeur_RGB_3 = v1_0::applLUT(IRM_coeur, lut3);
+
+    auto IRM_RGB_crane_RGB1 = v1_0::applLUT(IRM_RGB_crane, lut1);
+    auto IRM_RGB_crane_RGB2 = v1_0::applLUT(IRM_RGB_crane, lut2);
      
      
     //  // 5. Sauvegarde des images en couleur
     //  savePPM(imageXR__femoral_BE, 256, 256, "C:\\Users\\lylehara\\Downloads\\TER\\imagesColors\\coeur_LE.ppm");
-    v1_0::sauvegarderPPM(imageXR__femoral_BE_RGB_1, 512, 512,  imageRGB+"imageXR__femoral_BE_RGB_1.ppm");
-    v1_0::sauvegarderPPM(imageXR__femoral_BE_RGB_2, 512, 512,  imageRGB+"imageXR__femoral_BE_RGB_2.ppm");
-    v1_0::sauvegarderPPM(imageXR__femoral_BE_RGB_3, 512, 512,  imageRGB+"imageXR__femoral_BE_RGB_3.ppm");
+    v1_0::sauvegarderPPM(imageXR__femoral_RGB_1, 512, 512,  imageRGB+"imageXR__femoral_RGB_1.ppm");
+    v1_0::sauvegarderPPM(imageXR__femoral_RGB_2, 512, 512,  imageRGB+"imageXR__femoral_RGB_2.ppm");
+    v1_0::sauvegarderPPM(imageXR__femoral_RGB_3, 512, 512,  imageRGB+"imageXR__femoral_RGB_3.ppm");
+
+    v1_0::sauvegarderPPM(IRM_coeur_RGB_1, 512, 512,  imageRGB+"IRM_coeur_RGB_1.ppm");
+    v1_0::sauvegarderPPM(IRM_coeur_RGB_2, 512, 512,  imageRGB+"IRM_coeur_RGB_2.ppm");
+    v1_0::sauvegarderPPM(IRM_coeur_RGB_3, 512, 512,  imageRGB+"IRM_coeur_RGB_3.ppm");
 
 
     //  // 5. Sauvegarde des images en couleur
-    v1_0::sauvegarderPPM(IRM_RGB_crane_BE_RGB1, 256, 256,  imageRGB+"IRM_RGB_crane_BE_RGB1.ppm");
-    v1_0::sauvegarderPPM(IRM_RGB_crane_BE_RGB2, 256, 256,  imageRGB+"IRM_RGB_crane_BE_RGB2.ppm");
-    v1_0::sauvegarderPPM(IRM_RGB_crane_LE_RGB1, 256, 256,  imageRGB+"IRM_RGB_crane_LE_RGB1.ppm");
-    v1_0::sauvegarderPPM(IRM_RGB_crane_LE_RGB2, 256, 256,  imageRGB+"IRM_RGB_crane_LE_RGB2.ppm");
+    v1_0::sauvegarderPPM(IRM_RGB_crane_RGB1, 256, 256,  imageRGB+"IRM_RGB_crane_RGB1.ppm");
+    v1_0::sauvegarderPPM(IRM_RGB_crane_RGB2, 256, 256,  imageRGB+"IRM_RGB_crane_RGB2.ppm");
      
 break;
 }
 
 case 2:{
     std::cout << "Namespace 1.1 sélectionné\n";
-
-
-
-// Générer images de test
+// Générer images de test (uint8_t, pas besoin d’endianess)
 v1_1::Image<uint8_t> imageBlanche(256, 256);
 imageBlanche.creerImageBlache();
 imageBlanche.ecrireFichierRaw("ImageBlanche.raw");
-imageBlanche.sauvegarderPGM( imagePGM+"ImageBlanche.pgm");
+imageBlanche.sauvegarderPGM(imagePGM + "ImageBlanche.pgm");
 
 v1_1::Image<uint8_t> imageDamier(256, 256);
 imageDamier.creerDamier(64);
-imageDamier.ecrireFichierRaw( "ImageDamier.raw");
-imageDamier.sauvegarderPGM( imagePGM+"ImageDamier.pgm");
+imageDamier.ecrireFichierRaw("ImageDamier.raw");
+imageDamier.sauvegarderPGM(imagePGM + "ImageDamier.pgm");
 
 v1_1::Image<uint8_t> imageSinus(256, 256);
 imageSinus.creerSinusoidale(25);
-imageSinus.ecrireFichierRaw( "ImageSinus.raw");
-imageSinus.sauvegarderPGM(imagePGM+"ImageSinus.pgm");
+imageSinus.ecrireFichierRaw("ImageSinus.raw");
+imageSinus.sauvegarderPGM(imagePGM + "ImageSinus.pgm");
+
+// Lire images RAW correctement
+
+// uint8_t : pas de paramètre endian (inutile)
+auto XR_femoral = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512);
+auto IRM_coeur = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "IRM_8_bits_256x256_coeur.raw", 256, 256);
+
+// uint16_t : gérer endianess explicitement (false=BE, true=LE)
+auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, false);
+auto TDM_16_bits_LE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, true);
+
+// Conversion 16 bits -> 8 bits : 
+// **On choisit une seule conversion** car uint8_t n'a pas d'endianness
+auto TDM_16_crane_converte = TDM_16_bits_LE.convertirImage<uint8_t>(false);
+
+// Images RGB 8 bits par composante (pas d’impact endianess normalement, mais méthode attend bool)
+auto IRM_RGB_crane = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, false);
+
+// Conversion en niveaux de gris (pas de différence d’endianness pour uint8_t)
+auto IRM_RGB_crane_Gris = v1_1::convertRGB_Gris(IRM_RGB_crane, 256, 256);
+
+// Sauvegarder PGM (niveau de gris)
+XR_femoral.sauvegarderPGM(imagePGM + "XR_femoral.pgm");
+IRM_coeur.sauvegarderPGM(imagePGM + "IRM_coeur.pgm");
+TDM_16_crane_converte.sauvegarderPGM(imagePGM + "TDM_16_crane_converte.pgm");  // Une seule version 8 bits
+
+IRM_RGB_crane_Gris.sauvegarderPGM(imagePGM + "IRM_RGB_8_bits_engris.pgm");
+
+// Charger LUTs
+auto lut11 = v1_1::ImageRGB::chargerLUT(lutPath + "16_Color_Ramps.lut");
+auto lut12 = v1_1::ImageRGB::chargerLUT(lutPath + "16-color.lut");
+
+// Appliquer LUT sur images 8 bits (une seule version 16->8 bits convertie)
+v1_1::ImageRGB XR_femoral_LUT_11(XR_femoral, 512, 512, lut11);
+v1_1::ImageRGB XR_femoral_LUT_12(XR_femoral, 512, 512, lut12);
+
+v1_1::ImageRGB IRM_coeur_LUT_11(IRM_coeur, 256, 256, lut11);
+v1_1::ImageRGB IRM_coeur_LUT_12(IRM_coeur, 256, 256, lut12);
 
 
-  // Lire images RAW correctement
-  auto XR_femoral_BE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, false);
-  auto XR_femoral_LE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, true);
- 
-  auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, false);
-  auto TDM_16_bits_LE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, true);
+v1_1::ImageRGB TDM_16_crane_converte_LUT_11(TDM_16_crane_converte, 512, 512, lut11);
+v1_1::ImageRGB TDM_16_crane_converte_LUT_12(TDM_16_crane_converte, 512, 512, lut12);
 
-  auto TDM_16__crane_converte_BE = TDM_16_bits_BE.convertirImage< uint8_t>( true);
-  auto TDM_16__crane_converte_LE = TDM_16_bits_BE.convertirImage< uint8_t>( true);
+v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT(IRM_RGB_crane_Gris, 256, 256, lut11);
 
-  //ImgaeRGB
+v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT2(IRM_RGB_crane_Gris, 256, 256, lut12);
 
-    auto IRM_RGB_crane_BE = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, false);
-    auto IRM_RGB_crane_LE = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, true);
-   
-    auto IRM_RGB_crane_BEGris_BE = v1_1::convertRGB_Gris(IRM_RGB_crane_BE, 256, 256);
-    auto IRM_RGB_crane_BEGris_LE = v1_1::convertRGB_Gris(IRM_RGB_crane_BE, 256, 256);
- 
+// Sauvegarder en PPM
+XR_femoral_LUT_11.sauvegarderPPM(imageRGB + "XR_femoral_LUT_11.ppm");
+XR_femoral_LUT_12.sauvegarderPPM(imageRGB + "XR_femoral_LUT_12.ppm");
 
-  XR_femoral_BE.sauvegarderPGM( imagePGM+"XR_femoral_BE.pgm");
-  XR_femoral_LE.sauvegarderPGM( imagePGM+"XR_femoral_LE.pgm");
-  
-  TDM_16__crane_converte_BE.sauvegarderPGM( imagePGM+"TDM_16_bits_BE.pgm");
-  TDM_16__crane_converte_LE.sauvegarderPGM( imagePGM+"TDM_16_bits_LE.pgm");
-
-  IRM_RGB_crane_BEGris_BE.sauvegarderPGM( imagePGM+"IRM_RGB_8_bits_engris_BE.pgm");
-  IRM_RGB_crane_BEGris_LE.sauvegarderPGM( imagePGM+"IRM_RGB_8_bits_engris_LE.pgm");
-
-  // Charger LUT
-  auto lut11 = v1_1::ImageRGB::chargerLUT(lutPath + "000-gray.lut");
-  auto lut12 = v1_1::ImageRGB::chargerLUT(lutPath + "001-fire.lut");
-
-  // Appliquer LUT
-  v1_1::ImageRGB XR_femoral_BE_LUT_11(XR_femoral_BE, 512, 512, lut11);
-  
-  v1_1::ImageRGB TDM_16__crane_converte_LE_11(TDM_16__crane_converte_LE, 512, 512, lut11);
-  v1_1::ImageRGB TDM_16__crane_converte_BE_11(TDM_16__crane_converte_BE, 512, 512, lut11);
-  
-  v1_1::ImageRGB TDM_16__crane_converte_LE_12(TDM_16__crane_converte_LE, 512, 512, lut12);
-  v1_1::ImageRGB TDM_16__crane_converte_BE_12(TDM_16__crane_converte_BE, 512, 512, lut12);
-  
-
-  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT_BE(IRM_RGB_crane_BEGris_BE, 256, 256, lut11);
-  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT_LE(IRM_RGB_crane_BEGris_LE, 256, 256, lut11);
-
-  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT1_BE(IRM_RGB_crane_BEGris_BE, 256, 256, lut12);
-  v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT1_LE(IRM_RGB_crane_BEGris_LE, 256, 256, lut12);
+IRM_coeur_LUT_11.sauvegarderPPM(imageRGB + "IRM_coeur_LUT_11.ppm");
+IRM_coeur_LUT_12.sauvegarderPPM(imageRGB + "IRM_coeur_LUT_12.ppm");
 
 
-  // Sauvegarder en .ppm
-  XR_femoral_BE_LUT_11.sauvegarderPPM( imageRGB+ "XR_femoral_BE_LUT_11.ppm");
+TDM_16_crane_converte_LUT_11.sauvegarderPPM(imageRGB + "TDM_16_crane_converte_LUT_11.ppm");
+TDM_16_crane_converte_LUT_12.sauvegarderPPM(imageRGB + "TDM_16_crane_converte_LUT_12.ppm");
 
-  TDM_16__crane_converte_LE_11.sauvegarderPPM( imageRGB+ " TDM_16__crane_converte_LE_1.ppm");
-  TDM_16__crane_converte_BE_11.sauvegarderPPM( imageRGB+ " TDM_16__crane_converte_BE_1.ppm");
+IRM_RGB_crane_BEGris_LUT.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT1.ppm");
 
-  TDM_16__crane_converte_LE_12.sauvegarderPPM( imageRGB+ " TDM_16__crane_converte_LE_2.ppm");
-  TDM_16__crane_converte_BE_12.sauvegarderPPM( imageRGB+ " TDM_16__crane_converte_BE_2.ppm");
-
-  IRM_RGB_crane_BEGris_LUT_BE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT1_BE.ppm");
-  IRM_RGB_crane_BEGris_LUT_LE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT1_LE.ppm");
-
-  IRM_RGB_crane_BEGris_LUT1_BE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT2_BE_2.ppm");
-  IRM_RGB_crane_BEGris_LUT1_LE.sauvegarderPPM( imageRGB+ " IRM_RGB_8_bits_LUT2_LE_2.ppm");
-
-
+IRM_RGB_crane_BEGris_LUT2.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT2.ppm");
 
         
 break;
@@ -218,28 +218,86 @@ break;
 case 3: {
 std::cout << "Namespace 2.0 sélectionné\n";
 
+// Générer images de test (uint8_t, pas besoin d’endianess)
 v1_1::Image<uint8_t> imageBlanche(256, 256);
 imageBlanche.creerImageBlache();
-imageBlanche.sauvegarderPGM("imageBlanche.pgm");
-v1_1::Image<uint8_t> imageSinus(256, 256);
-imageSinus.creerSinusoidale(3);
-imageSinus.sauvegarderPGM("imageSinusoidale.pgm");
-
+imageBlanche.ecrireFichierRaw("ImageBlanche.raw");
+imageBlanche.sauvegarderPGM(imagePGM + "ImageBlanche.pgm");
 
 v1_1::Image<uint8_t> imageDamier(256, 256);
 imageDamier.creerDamier(64);
-  // Crée résultat
-  v1_1::Image<uint8_t> result1(256, 256);
+imageDamier.ecrireFichierRaw("ImageDamier.raw");
+imageDamier.sauvegarderPGM(imagePGM + "ImageDamier.pgm");
 
-  result1 = v2_0::Addition<uint8_t>::addition(imageSinus, imageDamier);
-  result1.sauvegarderPGM("result1.pgm");
+v1_1::Image<uint8_t> imageSinus(256, 256);
+imageSinus.creerSinusoidale(25);
+imageSinus.ecrireFichierRaw("ImageSinus.raw");
+imageSinus.sauvegarderPGM(imagePGM + "ImageSinus.pgm");
 
-  auto XR_femoral_BE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, false);
-  auto XR_femoral_LE = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512, true);
- 
-  XR_femoral_BE.sauvegarderPGM( imagePGM+"XR_femoral_BE.pgm");
-  XR_femoral_LE.sauvegarderPGM( imagePGM+"XR_femoral_LE.pgm");
+// Lire images RAW correctement
 
+// uint8_t : pas de paramètre endian (inutile)
+auto XR_femoral = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512);
+auto IRM_coeur = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "IRM_8_bits_256x256_coeur.raw", 256, 256);
+
+// uint16_t : gérer endianess explicitement (false=BE, true=LE)
+auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, false);
+auto TDM_16_bits_LE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, true);
+
+// Conversion 16 bits -> 8 bits : 
+// **On choisit une seule conversion** car uint8_t n'a pas d'endianness
+auto TDM_16_crane_converte = TDM_16_bits_LE.convertirImage<uint8_t>(false);
+
+// Images RGB 8 bits par composante (pas d’impact endianess normalement, mais méthode attend bool)
+auto IRM_RGB_crane = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, false);
+
+// Conversion en niveaux de gris (pas de différence d’endianness pour uint8_t)
+auto IRM_RGB_crane_Gris = v1_1::convertRGB_Gris(IRM_RGB_crane, 256, 256);
+
+// Sauvegarder PGM (niveau de gris)
+XR_femoral.sauvegarderPGM(imagePGM + "XR_femoral.pgm");
+IRM_coeur.sauvegarderPGM(imagePGM + "IRM_coeur.pgm");
+TDM_16_crane_converte.sauvegarderPGM(imagePGM + "TDM_16_crane_converte.pgm");  // Une seule version 8 bits
+
+IRM_RGB_crane_Gris.sauvegarderPGM(imagePGM + "IRM_RGB_8_bits_engris.pgm");
+
+// Charger LUTs
+auto lut11 = v1_1::ImageRGB::chargerLUT(lutPath + "16_Color_Ramps.lut");
+auto lut12 = v1_1::ImageRGB::chargerLUT(lutPath + "16-color.lut");
+
+// Appliquer LUT sur images 8 bits (une seule version 16->8 bits convertie)
+v1_1::ImageRGB XR_femoral_LUT_11(XR_femoral, 512, 512, lut11);
+v1_1::ImageRGB XR_femoral_LUT_12(XR_femoral, 512, 512, lut12);
+
+v1_1::ImageRGB IRM_coeur_LUT_11(IRM_coeur, 256, 256, lut11);
+v1_1::ImageRGB IRM_coeur_LUT_12(IRM_coeur, 256, 256, lut12);
+
+
+v1_1::ImageRGB TDM_16_crane_converte_LUT_11(TDM_16_crane_converte, 512, 512, lut11);
+v1_1::ImageRGB TDM_16_crane_converte_LUT_12(TDM_16_crane_converte, 512, 512, lut12);
+
+v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT(IRM_RGB_crane_Gris, 256, 256, lut11);
+
+v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT2(IRM_RGB_crane_Gris, 256, 256, lut12);
+
+// Sauvegarder en PPM
+XR_femoral_LUT_11.sauvegarderPPM(imageRGB + "XR_femoral_LUT_11.ppm");
+XR_femoral_LUT_12.sauvegarderPPM(imageRGB + "XR_femoral_LUT_12.ppm");
+
+IRM_coeur_LUT_11.sauvegarderPPM(imageRGB + "IRM_coeur_LUT_11.ppm");
+IRM_coeur_LUT_12.sauvegarderPPM(imageRGB + "IRM_coeur_LUT_12.ppm");
+
+
+TDM_16_crane_converte_LUT_11.sauvegarderPPM(imageRGB + "TDM_16_crane_converte_LUT_11.ppm");
+TDM_16_crane_converte_LUT_12.sauvegarderPPM(imageRGB + "TDM_16_crane_converte_LUT_12.ppm");
+
+IRM_RGB_crane_BEGris_LUT.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT1.ppm");
+
+IRM_RGB_crane_BEGris_LUT2.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT2.ppm");
+
+
+v1_1::Image<uint8_t> additionResult1 = v2_0::Addition<uint8_t>::addition(XR_femoral, TDM_16_crane_converte);
+additionResult1.sauvegarderPGM("TDM_16_crane_converte+XR_femoral.pgm");
 
 
 // 3. Appliquer égalisation histogramme sur imageDamier
@@ -247,7 +305,7 @@ v2_0::HistogramEqualization<uint8_t> heq(imageSinus);
 heq.Update();  // égalisation exécutée
 
 
-v2_0::HistogramEqualization<uint8_t> hist(XR_femoral_BE);
+v2_0::HistogramEqualization<uint8_t> hist(XR_femoral);
 hist.Update();  // égalisation exécutée
 
 // 4. Récupérer l’image égalisée
@@ -269,9 +327,9 @@ histoImage2.sauvegarderPGM("imageEqualized2.pgm");
 auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(3);
 auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(5, 1.0f);
 auto expo =v2_0:: Convolution<uint8_t>::createExponentiel(5, 0.8f);
-v2_0::Convolution<uint8_t> filtreGaussien(XR_femoral_BE, gaussien);
-v2_0::Convolution<uint8_t> filtreMoyenneur(XR_femoral_BE, moyenneur);
-v2_0::Convolution<uint8_t> filtreExpo(XR_femoral_BE, expo);
+v2_0::Convolution<uint8_t> filtreGaussien(XR_femoral, gaussien);
+v2_0::Convolution<uint8_t> filtreMoyenneur(XR_femoral, moyenneur);
+v2_0::Convolution<uint8_t> filtreExpo(XR_femoral, expo);
 filtreGaussien.Process();
 
 auto output = filtreGaussien.getOutput();
@@ -290,7 +348,7 @@ outputImage2.sauvegarderPGM("image_filtrée_expo.pgm");
 
 // Créer l'image et le filtre
 auto filtre = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreButterworth(512  , 512, 30.0f, 2);
-v2_0::FiltrageFrequenciel<uint8_t> filtrage(XR_femoral_BE, filtre);
+v2_0::FiltrageFrequenciel<uint8_t> filtrage(XR_femoral, filtre);
 filtrage.Update();
 
 v1_1::Image<uint8_t> imageFiltrée = filtrage.getOutput();
@@ -314,4 +372,9 @@ std::cout << "Choix invalide, veuillez taper 0, 1 ou 2.\n";
 
 }
    
+} catch (const std::exception& ex) {
+  std::cerr << "Exception attrapée : " << ex.what() << std::endl;
+  return 1;
+}
+return 0;
 }

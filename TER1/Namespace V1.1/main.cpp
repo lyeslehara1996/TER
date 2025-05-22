@@ -9,9 +9,9 @@ int main() {
     const size_t width = 256;
     const size_t height = 256;
     //question 1
-    std::string filenameImagePGM = "C:\\Users\\lylehara\\Downloads\\TER\\Namespace V1.1\\ImagePGM\\";
-    std::string filenameimages_RAW = "C:\\Users\\lylehara\\Downloads\\TER\\images_RAW\\images\\";
-    std::string lutPath = "C:\\Users\\lylehara\\Downloads\\TER\\LUT\\LUT\\"; 
+    std::string filenameImagePGM = "C:\\Users\\lylehara\\Downloads\\TER\\TER1\\Namespace V1.1\\ImagePGM\\";
+    std::string filenameimages_RAW = "C:\\Users\\lylehara\\Downloads\\TER\\TER1\\Namespace V1.1\\images_RAW\\images\\";
+    std::string lutPath = "C:\\Users\\lylehara\\Downloads\\TER\\TER1\\Namespace V1.1\\LUT\\LUT\\"; 
     std::string filenameImagePPM = "C:\\Users\\lylehara\\Downloads\\TER\\Namespace V1.1\\ImagePPM\\";
 
 
