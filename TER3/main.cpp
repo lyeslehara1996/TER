@@ -157,8 +157,8 @@ auto XR_femoral = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x5
 auto IRM_coeur = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "IRM_8_bits_256x256_coeur.raw", 256, 256);
 
 // uint16_t : gérer endianess explicitement (false=BE, true=LE)
-auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, false);
-auto TDM_16_bits_LE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, true);
+auto TDM_16_bits_LE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, false);
+auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bits_512x512_crane.raw", 512, 512, true);
 
 // Conversion 16 bits -> 8 bits : 
 // **On choisit une seule conversion** car uint8_t n'a pas d'endianness
@@ -301,14 +301,29 @@ additionResult1.sauvegarderPGM("TDM_16_crane_converte+XR_femoral.pgm");
 
 
 // 3. Appliquer égalisation histogramme sur imageDamier
-v2_0::HistogramEqualization<uint8_t> heq(imageSinus);
+// On crée une copie temporaire pour analyser l'image sans l'altérer
+v2_0::egalisationHistogram<uint8_t> histSinusAvant(imageSinus);
+histSinusAvant.computeHistogram(imageSinus); // Histogramme AVANT
+auto histoSinusAvant = histSinusAvant.getHistogramImage();
+histoSinusAvant.sauvegarderPGM("histoSinusAvant.pgm");
+
+v2_0::egalisationHistogram<uint8_t> histXR_femoralAvant(XR_femoral);
+histXR_femoralAvant.computeHistogram(XR_femoral); // Histogramme AVANT
+auto histoXR_femoralAvant = histXR_femoralAvant.getHistogramImage();
+histoXR_femoralAvant.sauvegarderPGM("histoXR_femoralAvant.pgm");
+
+
+// 2. Appliquer l’égalisation d’histogramme
+
+v2_0::egalisationHistogram<uint8_t> heq(imageSinus);
 heq.Update();  // égalisation exécutée
 
-
-v2_0::HistogramEqualization<uint8_t> hist(XR_femoral);
+v2_0::egalisationHistogram<uint8_t> hist(XR_femoral);
 hist.Update();  // égalisation exécutée
 
-// 4. Récupérer l’image égalisée
+
+// 3. Sauvegarder les images égalisées
+
 auto imageEqualized = heq.getOutput();
 imageEqualized.sauvegarderPGM("egalisee.pgm");
 
@@ -316,13 +331,14 @@ auto imageEqualized2 = hist.getOutput();
 imageEqualized2.sauvegarderPGM("egalisee2.pgm");
 
 
-// 5. Générer et sauvegarder l’histogramme de l’image égalisée
-auto histoImage = heq.getHistogramImage();  //
-histoImage.sauvegarderPGM("imageSinus.pgm");
+// 4. Générer histogramme APRÈS égalisation
 
-auto histoImage2 = hist.getHistogramImage(); 
-histoImage2.sauvegarderPGM("imageEqualized2.pgm");
+// Le calcul d'histogramme est automatiquement refait dans `Process()`
+auto histoImageApres = heq.getHistogramImage();
+histoImageApres.sauvegarderPGM("histoSinusApres.pgm");
 
+auto histoImage2Apres = hist.getHistogramImage();
+histoImage2Apres.sauvegarderPGM("histoXR_femoralAprés.pgm");
 
 auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(3);
 auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(5, 1.0f);

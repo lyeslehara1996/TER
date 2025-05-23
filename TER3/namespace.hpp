@@ -121,33 +121,37 @@ namespace v1_0 {
      et le codage little endian (le plus répandu pour les images codées sur plusieurs octets). 
     */
     
-//   Fichier brut, sans en-tête, sans information de dimensions, juste des données brutes //L’ordinateur ne peut pas deviner la taille ou les canaux : tu dois la spécifier toi-même
+    //Fichier brut, sans en-tête, sans information de dimensions, juste des données brutes //L’ordinateur ne peut pas deviner la taille ou les canaux : tu dois la spécifier toi-même
     template<typename T>
-    std::vector<T> lireImageRAW(const std::string& nomFichier, int largeur, int hauteur,bool bigEndian = false) {
-        std::ifstream in(nomFichier, std::ios::binary);
-        if (!in) throw std::runtime_error("Erreur d'ouverture du fichier : " + nomFichier);
+std::vector<T> lireImageRAW(const std::string& nomFichier, int largeur, int hauteur, bool bigEndian = false) {
+    std::ifstream in(nomFichier, std::ios::binary);
+    if (!in) throw std::runtime_error("Erreur d'ouverture du fichier : " + nomFichier);
 
-        size_t nbPixels = largeur * hauteur;
-       std::vector<T> img(nbPixels);
-       //reinterpret_cast<char*> → C++ veut des char* pour lire des octets
-        in.read(reinterpret_cast<char*>(img.data()), nbPixels * sizeof(T)); //nbPixels * sizeof(T) → taille totale des données à lire en octets // Si T = uint8_t → lecture de 1 octet par pixel, Si T = uint16_t → lecture de 2 octets par pixel
+    std::vector<T> img(largeur * hauteur);  // img.size() == nbPixels
+           //reinterpret_cast<char*> → C++ veut des char* pour lire des octets
+    in.read(reinterpret_cast<char*>(img.data()), img.size() * sizeof(T));  // Lecture des octets
+                                                                                        ////nbPixels * sizeof(T) → taille totale des données à lire en octets // Si T = uint8_t → lecture de 1 octet par pixel, Si T = uint16_t → lecture de 2 octets par pixel
 
-        //LE big ou Little endiane  Uniquement utile si les pixels sont codés sur plusieurs octets (ex: uint16_t, float)
-        if (bigEndian && sizeof(T) > 1) {
-            for (T& pixel : img) {
-                uint8_t* ptr = reinterpret_cast<uint8_t*>(&pixel); //on transforme cette adresse en tableau d’octets
-                std::reverse(ptr, ptr + sizeof(T));
-            }
+
+    // Inversion d’endianess si besoin (pour les types > 1 octet)
+    if (bigEndian && sizeof(T) > 1) {
+        for (T& pixel : img) {
+            uint8_t* ptr = reinterpret_cast<uint8_t*>(&pixel);//on transforme cette adresse en tableau d’octets
+            std::reverse(ptr, ptr + sizeof(T));
         }
-        in.close();
-        return img;
     }
 
+    in.close();
+    return img;
+}
 
     template<typename T>
     void ecrireFichierRaw(const std::vector<T>& image, const std::string& filename) {
         std::ofstream out(filename, std::ios::binary);
-        out.write(reinterpret_cast<const char*>(image.data()), image.size() * sizeof(T));
+        out.write(reinterpret_cast<const char*>(image.data()), image.size() * sizeof(T)); //image.data() => donne un pointeur vers les données brutes du vecteur
+                                                                                                     //Le fichier ne sait écrire que des octets (char), donc on doit changer le type du pointeur
+                                                                                                     //  (T*) en const char* avec reinterpret_cast, pour pouvoir écrire les données brutes dans un fichier binaire (RAW).
+                                                                                                     //// Les données ne changent pas, seule la façon de les interpréter change.
         out.close();
     }
 
@@ -204,7 +208,8 @@ std::vector<uint8_t> applLUT(const std::vector<uint8_t>& imageGris, const std::v
 
 // Conversion de l'image
 template<typename SrcType, typename DstType>
-std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjustDynamics) {
+std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjustDynamics) { //On va ré-étaler la plage de valeurs de l’image source pour utiliser toute la plage possible de la destination.
+                                                                                            //prends toute la plage utile des valeurs en uint16_t et on les "étales" sur toute la plage disponible en uint8_t (de 0 à 255)
     std::vector<DstType> imageCnvert(image.size());
 
     SrcType minVal = *std::min_element(image.begin(), image.end());
@@ -349,8 +354,8 @@ protected:
         for (int y = 0; y < _hauteur; ++y) {
             for (int x = 0; x < _largeur; ++x) {
                 bool estBlanc = ((x / tailleCase) % 2 == (y / tailleCase) % 2);
-                (*this)(x, y) = estBlanc ? std::numeric_limits<T>::max() : 0;
-            }
+                (*this)(x, y) = estBlanc ? std::numeric_limits<T>::max() : 0;  //(*this) désigne l’instance courante de la classe (l’objet sur lequel on est en train de travailler).
+            }                                                                   //Grâce à la surcharge de l’opérateur (), écrire (*this)(x,y) revient à accéder au pixel en (x,y) 
         }
        
     }
@@ -440,9 +445,9 @@ protected:
     class ImageRGB : public  Image<uint8_t>{
 
         public :
-        
-        ImageRGB(const Image<uint8_t>& rgbImage, int largeur, int hauteur);
-        ImageRGB(const Image<uint8_t>& imageGris,  size_t Largeur, size_t Hauteur,const std::vector<uint8_t>& lut);
+        //Surcgarge de constructeur 
+        ImageRGB(const Image<uint8_t>& rgbImage, int largeur, int hauteur); //creer des images RGB simple 
+        ImageRGB(const Image<uint8_t>& imageGris,  size_t Largeur, size_t Hauteur,const std::vector<uint8_t>& lut); //Convertir des images RGB en niveau de gris on appliquant LUT
 
             
         const std::vector<uint8_t>& getImageRGB() const;
@@ -466,22 +471,22 @@ protected:
         
    
 ImageRGB::ImageRGB(const Image<uint8_t>& rgbImage, int largeur, int hauteur)
-: Image<uint8_t>(largeur, hauteur * 3), _ImageRGB(rgbImage.getData()) {}
+: Image<uint8_t>(largeur, hauteur * 3), _ImageRGB(rgbImage.getData()) {} // *3 pour les composantes : Rouge, Vert, Bleu.
 
 ImageRGB::ImageRGB(const Image<uint8_t>& imageGris, size_t Largeur, size_t Hauteur, const std::vector<uint8_t>& lut)
-: Image<uint8_t>(Largeur, Hauteur), _ImageRGB(Largeur * Hauteur * 3)
+: Image<uint8_t>(Largeur, Hauteur), _ImageRGB(Largeur * Hauteur * 3) //Converti une image uint8_t de niveau de gris on image RGB contient trois cannaux R,G,B 
 {
     if (lut.size() != 256 * 3) {
         throw std::runtime_error("LUT invalide. Elle doit contenir exactement 256x3 valeurs.");
     }
 
     const auto& data = imageGris.getData();
-    for (size_t i = 0; i < data.size(); ++i) {
-        uint8_t intensity = data[i];
-        int lutIndex = intensity * 3;
-        _ImageRGB[3 * i + 0] = lut[lutIndex + 0]; // R
-        _ImageRGB[3 * i + 1] = lut[lutIndex + 1]; // G
-        _ImageRGB[3 * i + 2] = lut[lutIndex + 2]; // B
+    for (size_t i = 0; i < data.size(); ++i) { //parcourir chaque pixel de l'image RGB 
+        uint8_t intensity = data[i]; //recupérer la valeur de pixel 0-255
+        int lutIndex = intensity * 3; //calculer index LUT si par exemple lutIndex = 6 
+        _ImageRGB[3 * i + 0] = lut[lutIndex + 0]; // R  6
+        _ImageRGB[3 * i + 1] = lut[lutIndex + 1]; // G  7 
+        _ImageRGB[3 * i + 2] = lut[lutIndex + 2]; // B  8
     }
 }
 
@@ -514,14 +519,14 @@ void ImageRGB::sauvegarderPPM(const std::string& fichier) const {
         
         Image<uint8_t> lectureImageRawRGB(const std::string& fichier, size_t largeur, size_t hauteur, bool bigEndian = false) {
             const size_t canaux = 3;
-            std::vector<uint8_t> buffer(largeur * hauteur * canaux);
+            std::vector<uint8_t> donnee(largeur * hauteur * canaux);
         
             std::ifstream in(fichier, std::ios::binary);
             if (!in) {
                 throw std::runtime_error("Erreur ouverture fichier : " + fichier);
             }
         
-            in.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
+            in.read(reinterpret_cast<char*>(donnee.data()), donnee.size());
             if (!in) {
                 throw std::runtime_error("Erreur de lecture : " + fichier);
             }
@@ -530,7 +535,7 @@ void ImageRGB::sauvegarderPPM(const std::string& fichier) const {
             // Mais s’il y avait des uint16_t, oui
         
             Image<uint8_t> imageRGB(largeur * 3, hauteur); 
-            imageRGB.setData(buffer);
+            imageRGB.setData(donnee);
         
             return imageRGB;
         }
@@ -554,15 +559,31 @@ void ImageRGB::sauvegarderPPM(const std::string& fichier) const {
         }
     }
 namespace v2_0 {
+/*
+Main
+ │
+ ▼
+Addition<T>::addition(img1, img2)
+ └───► crée objet Addition<T> add(...)
+       │
+       ├──► add.Update()
+       │     └──► this->Process()   (polymorphisme)
+       │            └──► Addition<T>::Process()  // vrai traitement
+       │
+
+      */
 #include "FFT.hpp"
     // Processing1 : pour une seule image en entrée
+
+    //class abstract contient une methode virtuelle qui sera implementer dans des class fille  
+    // utilisée pour définir une interface commune que toutes les classes dérivées doivent implémenter.
     template<typename T>
     class Processing1 {
     public:
         Processing1(v1_1::Image<T>& input, bool inPlace = false);
 
-        virtual void Process() = 0;
-
+        virtual void Process() = 0; //methode virtuelle, cette classe ne contient pas d'omplementation /
+                                    ///Par contre toute classe herite de cette class dois obligatoirement implementer cette methode 
         void Update();
 
         v1_1::Image<T>& getOutput();
@@ -570,26 +591,29 @@ namespace v2_0 {
     protected:
         v1_1::Image<T>& imageInput_;
         v1_1::Image<T> imageOutput_;
-        bool inPlace_;
+        bool inPlace_;  //inPlace_ indique si le traitement doit écraser l'image d'entrée ou non
     };
 
     // Processing2 : pour deux images en entrée
     template<typename T>
     class Processing2 {
-    public:
-        Processing2(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace = false);
+    public: //encapsulation (publique, private, protected), gère la sécurité d'accés au données(attributs et methodes)
 
-        virtual void Process() = 0;
+    //Constructeur
+        Processing2(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace = false);
+//Methodes 
+        virtual void Process() = 0; 
 
         void Update();
 
         v1_1::Image<T>& getOutput();
 
     protected:
+    //attributs
         v1_1::Image<T>& imageInput1_;
         v1_1::Image<T>& imageInput2_;
         v1_1::Image<T> imageOutput_;
-        bool inPlace_;
+        bool inPlace_; 
     };
 
     // Addition avec un scalaire
@@ -610,8 +634,10 @@ namespace v2_0 {
     template<typename T>
     class Addition : public Processing2<T> {
     public:
+    //constructeur 
         Addition(v1_1::Image<T>& input1, v1_1::Image<T>& input2, bool inPlace = false);
 
+        //methode process de la class processing2 (qui est virtuelle) doit etre implementer 
         void Process() override;
 
         // Méthode statique utilitaire pour addition sans créer d'objet
@@ -666,20 +692,17 @@ namespace v2_0 {
             size_t largeur2 = this->imageInput2_.getlargeur();
             size_t hauteur2 = this->imageInput2_.gethauteur();
         
-            size_t largeurFinale = largeur1;
-            size_t hauteurFinale = hauteur1;
+            size_t largeurFinale = std::max(largeur1, largeur2);
+            size_t hauteurFinale = std::max(hauteur1, hauteur2);
         
             v1_1::Image<T> imageTemp(largeurFinale, hauteurFinale);
         
             for (size_t y = 0; y < hauteurFinale; ++y) {
                 for (size_t x = 0; x < largeurFinale; ++x) {
-                    T val1 = this->imageInput1_(x, y);
-                    if (x < largeur2 && y < hauteur2) {
-                        T val2 = this->imageInput2_(x, y);
-                        imageTemp(x, y) = val1 + val2;
-                    } else {
-                        imageTemp(x, y) = val1;
-                    }
+                    T val1 = (x < largeur1 && y < hauteur1) ? this->imageInput1_(x, y) : 0;
+                    T val2 = (x < largeur2 && y < hauteur2) ? this->imageInput2_(x, y) : 0;
+        
+                    imageTemp(x, y) = val1 + val2;
                 }
             }
         
@@ -689,6 +712,7 @@ namespace v2_0 {
                 this->imageOutput_ = std::move(imageTemp);
             }
         }
+        
 
      // Méthode statique addition
   template<typename T>
@@ -740,27 +764,46 @@ namespace v2_0 {
 
     // la class Égalisation d'histogramme
 template<typename T>
-class HistogramEqualization : public Processing1<T> {   
+class egalisationHistogram : public Processing1<T> {   
 public:
-    HistogramEqualization(v1_1::Image<T>& input, bool inPlace = false);
+    egalisationHistogram(v1_1::Image<T>& input, bool inPlace = false);
 
     void Process() override;
 
     // Génère une image d'histogramme depuis l'entrée originale
     v1_1::Image<uint8_t> getHistogramImage();
 
+
+   void computeHistogram(const v1_1::Image<T>& image);
 private:
     std::vector<int> histogramImage_;  // pour getHistogramImage()
 };
 
-// HistogramEqualization
+// egalisationHistogram
+//Améliorer le contraste d’une image en répartissant de manière plus uniforme les niveaux de gris (valeurs de pixels entre 0 et 255).
+//Une image sombre aura des pixels concentrés dans les bas niveaux de gris (0-50).
+//L’égalisation d’histogramme étale ces valeurs sur toute la plage [0, 255], ce qui améliore la visibilité des détails.
+
+//Quand on regarde une image, ses pixels ont des intensités (par exemple de 0 à 255). Mais ces intensités ne sont pas toujours bien réparties : par exemple, elles peuvent être concentrées dans une petite plage (image sombre ou claire).
+
+//L’égalisation d’histogramme est une méthode pour étaler ou redistribuer ces intensités de manière plus uniforme sur toute la plage possible (0 à 255). Cela améliore le contraste de l’image.
 template<typename T>
-HistogramEqualization<T>::HistogramEqualization(v1_1::Image<T>& input, bool inPlace)
+egalisationHistogram<T>::egalisationHistogram(v1_1::Image<T>& input, bool inPlace)
     : Processing1<T>(input, inPlace) {}
 
-template<typename T>
-void HistogramEqualization<T>::Process() {
-    static_assert(std::is_same<T, uint8_t>::value, "HistogramEqualization ne supporte que uint8_t");
+
+    template<typename T>
+void egalisationHistogram<T>::computeHistogram(const v1_1::Image<T>& image) {
+    histogramImage_ = std::vector<int>(256, 0);
+    for (auto val : image.getData()) {
+        histogramImage_[val]++;
+    }
+}
+
+
+    template<typename T>
+void egalisationHistogram<T>::Process() {
+    static_assert(std::is_same<T, uint8_t>::value, "egalisation d'Histogram ne supporte que uint8_t");
 
     size_t w = this->imageInput_.getlargeur();
     size_t h = this->imageInput_.gethauteur();
@@ -769,13 +812,18 @@ void HistogramEqualization<T>::Process() {
     v1_1::Image<T>& output = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
     output = v1_1::Image<T>(w, h);
 
-    // 1. Histogramme
+    // 1. Histogramme d'entrée
+        // 1. Histogramme
+    //te donne combien de fois chaque intensité apparaît dans l’image.
     histogramImage_ = std::vector<int>(256, 0);
     for (auto val : this->imageInput_.getData()) {
         histogramImage_[val]++;
     }
 
     // 2. CDF
+    
+    // 2. CDF  La CDF donne, pour chaque niveau i, le nombre total de pixels de valeur ≤ i.
+    //Elle sert à transformer les anciennes valeurs vers de nouvelles valeurs étalées.
     std::vector<int> cdf(256);
     cdf[0] = histogramImage_[0];
     for (int i = 1; i < 256; ++i)
@@ -790,10 +838,15 @@ void HistogramEqualization<T>::Process() {
     for (size_t y = 0; y < h; ++y)
         for (size_t x = 0; x < w; ++x)
             output(x, y) = lut[this->imageInput_(x, y)];
+
+    // 5. Recalculer histogramme après égalisation
+    computeHistogram(output);
 }
 
+
+
 template<typename T>
-v1_1::Image<uint8_t> HistogramEqualization<T>::getHistogramImage() {
+v1_1::Image<uint8_t> egalisationHistogram<T>::getHistogramImage() {
     const int histlargeur = 256;
     const int histhauteur = 100;
 
