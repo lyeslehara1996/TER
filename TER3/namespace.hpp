@@ -16,7 +16,6 @@
 
 namespace v1_0 {
 
-    
     template <typename T>
     std::vector<T> allocationImage(size_t largeur, size_t hauteur) {
         return std::vector<T>(largeur * hauteur);
@@ -623,7 +622,7 @@ Addition<T>::addition(img1, img2)
         AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace = false);
 
         void Process() override;
-
+        static v1_1::Image<T> additionScalar(const v1_1::Image<T>& input, T valScalar);
     private:
         T valScalar_;
     };
@@ -644,9 +643,7 @@ Addition<T>::addition(img1, img2)
         static v1_1::Image<T> addition(const v1_1::Image<T>& imageInput1, const v1_1::Image<T>& imageInput2);
     };
 
-    template<typename T>
-    v1_1::Image<T> additionScalar(const v1_1::Image<T>& input, T valScalar);
-
+ 
     // ----------------- Implémentations -----------------
 
     // Processing1
@@ -747,7 +744,7 @@ Addition<T>::addition(img1, img2)
 
     // Fonction libre additionScalar
     template<typename T>
-    v1_1::Image<T> additionScalar(const v1_1::Image<T>& input, T valScalar) {
+   v1_1::Image<T> AdditionScalar<T>::additionScalar(const v1_1::Image<T>& input, T valScalar) {
         size_t largeur = input.getlargeur();
         size_t hauteur = input.gethauteur();
         v1_1::Image<T> output(largeur, hauteur);
@@ -774,7 +771,8 @@ public:
     v1_1::Image<uint8_t> getHistogramImage();
 
 
-   void computeHistogram(const v1_1::Image<T>& image);
+    // 5. Recalculer histogramme après égalisation
+   void compterHistogram(const v1_1::Image<T>& image);
 private:
     std::vector<int> histogramImage_;  // pour getHistogramImage()
 };
@@ -793,7 +791,7 @@ egalisationHistogram<T>::egalisationHistogram(v1_1::Image<T>& input, bool inPlac
 
 
     template<typename T>
-void egalisationHistogram<T>::computeHistogram(const v1_1::Image<T>& image) {
+void egalisationHistogram<T>::compterHistogram(const v1_1::Image<T>& image) {
     histogramImage_ = std::vector<int>(256, 0);
     for (auto val : image.getData()) {
         histogramImage_[val]++;
@@ -840,7 +838,7 @@ void egalisationHistogram<T>::Process() {
             output(x, y) = lut[this->imageInput_(x, y)];
 
     // 5. Recalculer histogramme après égalisation
-    computeHistogram(output);
+    compterHistogram(output);
 }
 
 
@@ -882,7 +880,7 @@ v1_1::Image<uint8_t> egalisationHistogram<T>::getHistogramImage() {
 template<typename T>
 class Convolution : public Processing1<T> {
 public:
-    Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& kernel, bool inPlace = false);
+    Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& noyau, bool inPlace = false);
 
     void Process() override;
 
@@ -891,27 +889,29 @@ public:
     static v1_1::Image<float> createExponentiel(int taille, float lambda);
 
 private:
-    v1_1::Image<float> kernel_;
+    v1_1::Image<float> noyau_;
 };
 
 // Constructeur
 template<typename T>
-Convolution<T>::Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& kernel, bool inPlace)
-    : Processing1<T>(image, inPlace), kernel_(kernel) {}
+Convolution<T>::Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& noyau, bool inPlace)
+    : Processing1<T>(image, inPlace), noyau_(noyau) {}
 
 // Processus de convolution
 template<typename T>
 void Convolution<T>::Process() {
     int w = this->imageInput_.getlargeur();
     int h = this->imageInput_.gethauteur();
-    int kw = kernel_.getlargeur();
-    int kh = kernel_.gethauteur();
+    int kw = noyau_.getlargeur();
+    int kh = noyau_.gethauteur();
     int dx = kw / 2;
     int dy = kh / 2;
 
     v1_1::Image<T>& out = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
-    out = v1_1::Image<T>(w, h);
-
+    if (!this->inPlace_) {
+        this->imageOutput_ = v1_1::Image<T>(w, h);  // allouer explicitement
+    }
+    
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
             float sum = 0.0f;
@@ -926,7 +926,7 @@ void Convolution<T>::Process() {
                     if (iy < 0) iy = 0;
                     if (iy >= h) iy = h - 1;
 
-                    sum += this->imageInput_(ix, iy) * kernel_(i, j);
+                    sum += this->imageInput_(ix, iy) * noyau_(i, j);
                 }
             }
 
@@ -942,18 +942,18 @@ void Convolution<T>::Process() {
 //Moyenneur
 template<typename T>
 v1_1::Image<float> Convolution<T>::createMoyenneur(int taille) {
-    v1_1::Image<float> kernel(taille, taille);
+    v1_1::Image<float> noyau(taille, taille);
     float val = 1.0f / (taille * taille);
     for (int y = 0; y < taille; ++y)
         for (int x = 0; x < taille; ++x)
-            kernel(x, y) = val;
-    return kernel;
+            noyau(x, y) = val;
+    return noyau;
 }
 
 //Gaussien 
 template<typename T>
 v1_1::Image<float> Convolution<T>::createGaussien(int taille, float sigma) {
-    v1_1::Image<float> kernel(taille, taille);
+    v1_1::Image<float> noyau(taille, taille);
     int c = taille / 2;
     float sum = 0.0f;
 
@@ -962,22 +962,22 @@ v1_1::Image<float> Convolution<T>::createGaussien(int taille, float sigma) {
             float dx = x - c;
             float dy = y - c;
             float val = std::exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
-            kernel(x, y) = val;
+            noyau(x, y) = val;
             sum += val;
         }
     }
 
     for (int y = 0; y < taille; ++y)
         for (int x = 0; x < taille; ++x)
-            kernel(x, y) /= sum;
+            noyau(x, y) /= sum;
 
-    return kernel;
+    return noyau;
 }
 //Exponentiel 
 
 template<typename T>
 v1_1::Image<float> Convolution<T>::createExponentiel(int taille, float lambda) {
-    v1_1::Image<float> kernel(taille, taille);
+    v1_1::Image<float> noyau(taille, taille);
     int c = taille / 2;
     float sum = 0.0f;
 
@@ -986,34 +986,27 @@ v1_1::Image<float> Convolution<T>::createExponentiel(int taille, float lambda) {
             float dx = std::abs(x - c);
             float dy = std::abs(y - c);
             float val = std::exp(-lambda * (dx + dy));
-            kernel(x, y) = val;
+            noyau(x, y) = val;
             sum += val;
         }
     }
 
     for (int y = 0; y < taille; ++y)
         for (int x = 0; x < taille; ++x)
-            kernel(x, y) /= sum;
+            noyau(x, y) /= sum;
 
-    return kernel;
+    return noyau;
 }
 
 //class 
-
-
 
 template<typename T>
 class FiltrageFrequenciel : public Processing2<T> {
 public:
     FiltrageFrequenciel(v1_1::Image<T>& image, v1_1::Image<T>& filtre);
-
     void Process() override;
-
     static v1_1::Image<T> creerFiltreButterworth(int largeur, int hauteur, float d0, int ordre);
 };
-
-
-
 
 template<typename T>
 FiltrageFrequenciel<T>::FiltrageFrequenciel(v1_1::Image<T>& image, v1_1::Image<T>& filtre)
@@ -1024,32 +1017,45 @@ void FiltrageFrequenciel<T>::Process() {
     size_t w = this->imageInput1_.getlargeur();
     size_t h = this->imageInput1_.gethauteur();
 
-    // Préparation FFT
+    // 1. Initialiser les parties réelle et imaginaire avec centrage
     v1_1::Image<T> realIn = this->imageInput1_;
-    v1_1::Image<T> imagIn(w, h); // imaginaire initialisé à 0
-    for (int y = 0; y < h; ++y)
-        for (int x = 0; x < w; ++x)
+    v1_1::Image<T> imagIn(w, h);
+
+    for (size_t y = 0; y < h; ++y)
+        for (size_t x = 0; x < w; ++x) {
+            realIn(x, y) *= ((x + y) % 2 == 0) ? 1 : -1;  // centrage
             imagIn(x, y) = 0;
+        }
 
+    // 2. FFT directe
     v1_1::Image<T> realF(w, h), imagF(w, h);
-
-    // FFT directe
     directFFT(realIn, imagIn, realF, imagF);
 
-    // Multiplication dans le domaine fréquentiel
-    for (size_t y = 0; y < h; ++y) {
+    // 3. Appliquer le filtre fréquentiel normalisé
+    for (size_t y = 0; y < h; ++y)
         for (size_t x = 0; x < w; ++x) {
-            T H = this->imageInput2_(x, y); // filtre réel
-            realF(x, y) *= H;
-            imagF(x, y) *= H;
+            float H = static_cast<float>(this->imageInput2_(x, y)) / 255.0f;  // [0,1]
+            realF(x, y) = static_cast<T>(realF(x, y) * H);
+            imagF(x, y) = static_cast<T>(imagF(x, y) * H);
         }
-    }
 
-    // FFT inverse
+    // 4. FFT inverse
     v1_1::Image<T> realOut(w, h), imagOut(w, h);
     inverseFFT(realF, imagF, realOut, imagOut);
 
-    this->imageOutput_ = realOut;
+    // 5. Décentrage de Fourier
+    for (size_t y = 0; y < h; ++y)
+        for (size_t x = 0; x < w; ++x)
+            realOut(x, y) *= ((x + y) % 2 == 0) ? 1 : -1;
+
+    // 6. Stocker le résultat, clamp entre 0 et 255
+    this->imageOutput_ = v1_1::Image<T>(w, h);
+    for (size_t y = 0; y < h; ++y)
+        for (size_t x = 0; x < w; ++x) {
+            float val = static_cast<float>(realOut(x, y));
+            val = std::max(0.0f, std::min(255.0f, val));
+            this->imageOutput_(x, y) = static_cast<T>(val);
+        }
 }
 
 template<typename T>
@@ -1058,19 +1064,18 @@ v1_1::Image<T> FiltrageFrequenciel<T>::creerFiltreButterworth(int width, int hei
     int cx = width / 2;
     int cy = height / 2;
 
-    for (int y = 0; y < height; ++y) {
+    for (int y = 0; y < height; ++y)
         for (int x = 0; x < width; ++x) {
             float dx = x - cx;
             float dy = y - cy;
             float d = std::sqrt(dx * dx + dy * dy);
-            float val = 1.0f / (1.0f + std::pow(d / d0, 2 * ordre));
-            filtre(x, y) = static_cast<T>(val * 255); // Mise à l’échelle
+            float H = 1.0f / (1.0f + std::pow(d / d0, 2 * ordre));
+            filtre(x, y) = static_cast<T>(H * 255.0f);  // dans [0,255]
         }
-    }
 
     return filtre;
 }
-
+    
 
 }
 #endif

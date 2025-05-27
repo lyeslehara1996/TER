@@ -340,38 +340,42 @@ histoImageApres.sauvegarderPGM("histoSinusApres.pgm");
 auto histoImage2Apres = hist.getHistogramImage();
 histoImage2Apres.sauvegarderPGM("histoXR_femoralAprés.pgm");
 
+v1_1::Image<uint8_t> IRM_coeurMoyenneur = TDM_16_crane_converte;
+v1_1::Image<uint8_t> IRM_coeurMoyenneurGaussien = TDM_16_crane_converte;
+v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = TDM_16_crane_converte;
+
+
 auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(3);
 auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(5, 1.0f);
 auto expo =v2_0:: Convolution<uint8_t>::createExponentiel(5, 0.8f);
-v2_0::Convolution<uint8_t> filtreGaussien(XR_femoral, gaussien);
-v2_0::Convolution<uint8_t> filtreMoyenneur(XR_femoral, moyenneur);
-v2_0::Convolution<uint8_t> filtreExpo(XR_femoral, expo);
+
+
+v2_0::Convolution<uint8_t> filtreMoyenneur(IRM_coeurMoyenneur, moyenneur, false);
+v2_0::Convolution<uint8_t> filtreGaussien(IRM_coeurMoyenneurGaussien, gaussien, false);
+v2_0::Convolution<uint8_t> filtreExpo(IRM_coeurMoyenneurExpo, expo, false);
+
 filtreGaussien.Process();
-
-auto output = filtreGaussien.getOutput();
-output.sauvegarderPGM("image_filtrée_gaussien.pgm");
-
 filtreMoyenneur.Process();
-
-auto outputImage = filtreMoyenneur.getOutput();
-outputImage.sauvegarderPGM("image_filtrée_moyeneur.pgm");
-
-
 filtreExpo.Process();
 
+auto output = filtreGaussien.getOutput();
+auto outputImage = filtreMoyenneur.getOutput();
 auto outputImage2 = filtreExpo.getOutput();
+
+output.sauvegarderPGM("image_filtrée_gaussien.pgm");
+outputImage.sauvegarderPGM("image_filtrée_moyeneur.pgm");
 outputImage2.sauvegarderPGM("image_filtrée_expo.pgm");
 
 // Créer l'image et le filtre
-auto filtre = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreButterworth(512  , 512, 30.0f, 2);
-v2_0::FiltrageFrequenciel<uint8_t> filtrage(XR_femoral, filtre);
-filtrage.Update();
 
-v1_1::Image<uint8_t> imageFiltrée = filtrage.getOutput();
-imageFiltrée.sauvegarderPGM("image_filtrée.pgm");
-
-
-
+   // Créer un filtre Butterworth
+   auto filtre = v2_0::FiltrageFrequenciel<unsigned char>::creerFiltreButterworth(XR_femoral.getlargeur(), XR_femoral.gethauteur(), 50.0f, 2);
+    
+   v2_0::FiltrageFrequenciel<unsigned char> filtreur(XR_femoral, filtre);
+   filtreur.Update();
+   
+   v1_1::Image<unsigned char> resultat = filtreur.getOutput();
+   resultat.sauvegarderPGM("image_filtrée.pgm");
 
 break; 
 }
