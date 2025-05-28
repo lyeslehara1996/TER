@@ -900,31 +900,31 @@ Convolution<T>::Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& no
 // Processus de convolution
 template<typename T>
 void Convolution<T>::Process() {
-    int w = this->imageInput_.getlargeur();
-    int h = this->imageInput_.gethauteur();
-    int kw = noyau_.getlargeur();
-    int kh = noyau_.gethauteur();
-    int dx = kw / 2;
-    int dy = kh / 2;
+    int L = this->imageInput_.getlargeur();
+    int H = this->imageInput_.gethauteur();
+    int nL = noyau_.getlargeur();
+    int nH = noyau_.gethauteur();
+    int dx = nL / 2;
+    int dy = nH / 2;
 
     v1_1::Image<T>& out = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
     if (!this->inPlace_) {
-        this->imageOutput_ = v1_1::Image<T>(w, h);  // allouer explicitement
+        this->imageOutput_ = v1_1::Image<T>(L, H);  // allouer explicitement
     }
     
-    for (int y = 0; y < h; ++y) {
-        for (int x = 0; x < w; ++x) {
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < L; ++x) {
             float sum = 0.0f;
-            for (int j = 0; j < kh; ++j) {
-                for (int i = 0; i < kw; ++i) {
+            for (int j = 0; j < nH; ++j) {
+                for (int i = 0; i < nL; ++i) {
                     int ix = x + i - dx;
                     int iy = y + j - dy;
 
                     // Gestion manuelle des bords (mirroring simple ici)
                     if (ix < 0) ix = 0;
-                    if (ix >= w) ix = w - 1;
+                    if (ix >= L) ix = L - 1;
                     if (iy < 0) iy = 0;
-                    if (iy >= h) iy = h - 1;
+                    if (iy >= H) iy = H - 1;
 
                     sum += this->imageInput_(ix, iy) * noyau_(i, j);
                 }
