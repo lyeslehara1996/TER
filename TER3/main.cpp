@@ -225,12 +225,12 @@ imageBlanche.ecrireFichierRaw("ImageBlanche.raw");
 imageBlanche.sauvegarderPGM(imagePGM + "ImageBlanche.pgm");
 
 v1_1::Image<uint8_t> imageDamier(256, 256);
-imageDamier.creerDamier(64);
+imageDamier.creerDamier(30);
 imageDamier.ecrireFichierRaw("ImageDamier.raw");
 imageDamier.sauvegarderPGM(imagePGM + "ImageDamier.pgm");
 
 v1_1::Image<uint8_t> imageSinus(256, 256);
-imageSinus.creerSinusoidale(25);
+imageSinus.creerSinusoidale(6);
 imageSinus.ecrireFichierRaw("ImageSinus.raw");
 imageSinus.sauvegarderPGM(imagePGM + "ImageSinus.pgm");
 
@@ -238,6 +238,7 @@ imageSinus.sauvegarderPGM(imagePGM + "ImageSinus.pgm");
 
 // uint8_t : pas de paramètre endian (inutile)
 auto XR_femoral = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "XR_8_bits_512x512_femoral.raw", 512, 512);
+auto thorax = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "TDM_8_bits_512x512_thorax.raw", 512, 512);
 auto IRM_coeur = v1_1::Image<uint8_t>::lireImageRAW(ImageRaw + "IRM_8_bits_256x256_coeur.raw", 256, 256);
 
 // uint16_t : gérer endianess explicitement (false=BE, true=LE)
@@ -255,6 +256,7 @@ auto IRM_RGB_crane = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256
 auto IRM_RGB_crane_Gris = v1_1::convertRGB_Gris(IRM_RGB_crane, 256, 256);
 
 // Sauvegarder PGM (niveau de gris)
+thorax.sauvegarderPGM(imagePGM + "thorax.pgm");
 XR_femoral.sauvegarderPGM(imagePGM + "XR_femoral.pgm");
 IRM_coeur.sauvegarderPGM(imagePGM + "IRM_coeur.pgm");
 TDM_16_crane_converte.sauvegarderPGM(imagePGM + "TDM_16_crane_converte.pgm");  // Une seule version 8 bits
@@ -269,6 +271,9 @@ auto lut12 = v1_1::ImageRGB::chargerLUT(lutPath + "16-color.lut");
 v1_1::ImageRGB XR_femoral_LUT_11(XR_femoral, 512, 512, lut11);
 v1_1::ImageRGB XR_femoral_LUT_12(XR_femoral, 512, 512, lut12);
 
+v1_1::ImageRGB thorax_LUT_11(thorax, 512, 512, lut11);
+v1_1::ImageRGB thorax_LUT_12(thorax, 512, 512, lut12);
+
 v1_1::ImageRGB IRM_coeur_LUT_11(IRM_coeur, 256, 256, lut11);
 v1_1::ImageRGB IRM_coeur_LUT_12(IRM_coeur, 256, 256, lut12);
 
@@ -281,6 +286,9 @@ v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT(IRM_RGB_crane_Gris, 256, 256, lut11);
 v1_1::ImageRGB IRM_RGB_crane_BEGris_LUT2(IRM_RGB_crane_Gris, 256, 256, lut12);
 
 // Sauvegarder en PPM
+thorax_LUT_11.sauvegarderPPM(imageRGB + "thorax_LUT_11.ppm");
+thorax_LUT_12.sauvegarderPPM(imageRGB + "thorax_LUT_12.ppm");
+
 XR_femoral_LUT_11.sauvegarderPPM(imageRGB + "XR_femoral_LUT_11.ppm");
 XR_femoral_LUT_12.sauvegarderPPM(imageRGB + "XR_femoral_LUT_12.ppm");
 
@@ -295,58 +303,75 @@ IRM_RGB_crane_BEGris_LUT.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT1.ppm");
 
 IRM_RGB_crane_BEGris_LUT2.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT2.ppm");
 
+//Adiition de deux image 
+v1_1::Image<uint8_t> additionResult0 = v2_0::AdditionScalar<uint8_t>::additionScalar(XR_femoral, 150);
+
+additionResult0.sauvegarderPGM("ScalarXR_femoral.pgm");
+
 
 v1_1::Image<uint8_t> additionResult1 = v2_0::Addition<uint8_t>::addition(XR_femoral, TDM_16_crane_converte);
 additionResult1.sauvegarderPGM("TDM_16_crane_converte+XR_femoral.pgm");
 
 
+v1_1::Image<uint8_t> additionResult2 = v2_0::Addition<uint8_t>::addition(imageDamier, imageSinus);
+additionResult2.sauvegarderPGM("imageDamier+imageSinus.pgm");
+
+v1_1::Image<uint8_t> additionResult3 = v2_0::Addition<uint8_t>::addition(IRM_coeur, XR_femoral);
+additionResult3.sauvegarderPGM("IRM_coeur+XR_femoral.pgm");
+
+
 // 3. Appliquer égalisation histogramme sur imageDamier
 // On crée une copie temporaire pour analyser l'image sans l'altérer
 v2_0::egalisationHistogram<uint8_t> histSinusAvant(imageSinus);
-histSinusAvant.computeHistogram(imageSinus); // Histogramme AVANT
+
+histSinusAvant.compterHistogram(imageSinus); // Histogramme AVANT
 auto histoSinusAvant = histSinusAvant.getHistogramImage();
-histoSinusAvant.sauvegarderPGM("histoSinusAvant.pgm");
+histoSinusAvant.sauvegarderPGM(imagePGM + "histoSinusAvant.pgm");
 
 v2_0::egalisationHistogram<uint8_t> histXR_femoralAvant(XR_femoral);
-histXR_femoralAvant.computeHistogram(XR_femoral); // Histogramme AVANT
+
+histXR_femoralAvant.compterHistogram(XR_femoral); // Histogramme AVANT
 auto histoXR_femoralAvant = histXR_femoralAvant.getHistogramImage();
-histoXR_femoralAvant.sauvegarderPGM("histoXR_femoralAvant.pgm");
+histoXR_femoralAvant.sauvegarderPGM(imagePGM + "histoXR_femoralAvant.pgm");
 
 
 // 2. Appliquer l’égalisation d’histogramme
 
-v2_0::egalisationHistogram<uint8_t> heq(imageSinus);
-heq.Update();  // égalisation exécutée
+v2_0::egalisationHistogram<uint8_t> histogaramme1(imageSinus);
+histogaramme1.Update();  // égalisation exécutée
 
-v2_0::egalisationHistogram<uint8_t> hist(XR_femoral);
-hist.Update();  // égalisation exécutée
+v2_0::egalisationHistogram<uint8_t> histogaramme2(XR_femoral);
+histogaramme2.Update();  // égalisation exécutée
 
 
 // 3. Sauvegarder les images égalisées
 
-auto imageEqualized = heq.getOutput();
-imageEqualized.sauvegarderPGM("egalisee.pgm");
+auto imageEgalisée = histogaramme1.getOutput();
+imageEgalisée.sauvegarderPGM(imagePGM + "imageSinusEgalisée.pgm");
 
-auto imageEqualized2 = hist.getOutput();
-imageEqualized2.sauvegarderPGM("egalisee2.pgm");
+auto imageEgalisée2 = histogaramme2.getOutput();
+imageEgalisée2.sauvegarderPGM(imagePGM + "image_XR_femoralEgalisée.pgm");
 
 
 // 4. Générer histogramme APRÈS égalisation
 
 // Le calcul d'histogramme est automatiquement refait dans `Process()`
-auto histoImageApres = heq.getHistogramImage();
-histoImageApres.sauvegarderPGM("histoSinusApres.pgm");
+auto histoSinusApres = histogaramme1.getHistogramImage();
+histoSinusApres.sauvegarderPGM(imagePGM + "histoSinusApres.pgm");
 
-auto histoImage2Apres = hist.getHistogramImage();
-histoImage2Apres.sauvegarderPGM("histoXR_femoralAprés.pgm");
-
-v1_1::Image<uint8_t> IRM_coeurMoyenneur = TDM_16_crane_converte;
-v1_1::Image<uint8_t> IRM_coeurMoyenneurGaussien = TDM_16_crane_converte;
-v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = TDM_16_crane_converte;
+auto histoXR_femoralAprés = histogaramme2.getHistogramImage();
+histoXR_femoralAprés.sauvegarderPGM(imagePGM + "histoXR_femoralAprés.pgm");
 
 
-auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(3);
-auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(5, 1.0f);
+//Convolution 
+
+v1_1::Image<uint8_t> IRM_coeurMoyenneur = IRM_coeur;
+v1_1::Image<uint8_t> IRM_coeurMoyenneurGaussien = IRM_coeur;
+v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = IRM_coeur;
+
+
+auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(10);
+auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(16, 1.0f);
 auto expo =v2_0:: Convolution<uint8_t>::createExponentiel(5, 0.8f);
 
 

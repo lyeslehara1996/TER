@@ -724,24 +724,30 @@ Addition<T>::addition(img1, img2)
   
       return add.getOutput();
   }
-    // AdditionScalar
-    template<typename T>
-    AdditionScalar<T>::AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace)
-        : Processing1<T>(input, inPlace), valScalar_(valScalar) {}
+ // AdditionScalar
+template<typename T>
+AdditionScalar<T>::AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace)
+    : Processing1<T>(input, inPlace), valScalar_(valScalar) {}
 
-    template<typename T>
-    void AdditionScalar<T>::Process() {
-        size_t largeur = this->imageInput_.getlargeur();
-        size_t hauteur = this->imageInput_.gethauteur();
-        v1_1::Image<T>& imageSortie = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
+template<typename T>
+void AdditionScalar<T>::Process() {
+    size_t largeur = this->imageInput_.getlargeur();
+    size_t hauteur = this->imageInput_.gethauteur();
+    v1_1::Image<T>& imageSortie = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
 
-        for (size_t y = 0; y < hauteur; ++y) {
-            for (size_t x = 0; x < largeur; ++x) {
-                imageSortie(x, y) = this->imageInput_(x, y) + valScalar_;
+    for (size_t y = 0; y < hauteur; ++y) {
+        for (size_t x = 0; x < largeur; ++x) {
+            T val = this->imageInput_(x, y) + valScalar_;
+
+            // Saturation (valeur maximale selon le type T)
+            if (std::numeric_limits<T>::is_integer) {
+                val = std::min<T>(val, std::numeric_limits<T>::max());
             }
+
+            imageSortie(x, y) = val;
         }
     }
-
+}
     // Fonction libre additionScalar
     template<typename T>
    v1_1::Image<T> AdditionScalar<T>::additionScalar(const v1_1::Image<T>& input, T valScalar) {
