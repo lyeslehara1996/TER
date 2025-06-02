@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -304,7 +305,7 @@ IRM_RGB_crane_BEGris_LUT.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT1.ppm");
 IRM_RGB_crane_BEGris_LUT2.sauvegarderPPM(imageRGB + "IRM_RGB_8_bits_LUT2.ppm");
 
 //Adiition de deux image 
-v1_1::Image<uint8_t> additionResult0 = v2_0::AdditionScalar<uint8_t>::additionScalar(XR_femoral, 150);
+v1_1::Image<uint8_t> additionResult0 = v2_0::AdditionScalaire<uint8_t>::additionScalaire(XR_femoral, 150);
 
 additionResult0.sauvegarderPGM("ScalarXR_femoral.pgm");
 
@@ -394,13 +395,31 @@ outputImage2.sauvegarderPGM("image_filtrée_expo.pgm");
 // Créer l'image et le filtre
 
    // Créer un filtre Butterworth
-   auto filtre = v2_0::FiltrageFrequenciel<unsigned char>::creerFiltreButterworth(XR_femoral.getlargeur(), XR_femoral.gethauteur(), 50.0f, 2);
-    
+    auto filtre = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreButterworth(XR_femoral.getlargeur(), XR_femoral.gethauteur(), 50.0f, 2);
+
    v2_0::FiltrageFrequenciel<unsigned char> filtreur(XR_femoral, filtre);
    filtreur.Update();
    
    v1_1::Image<unsigned char> resultat = filtreur.getOutput();
    resultat.sauvegarderPGM("image_filtrée.pgm");
+
+
+auto filtreIdealPB =v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreIdeal(512, 512, 50.0f, false); // passe-bas
+auto filtreIdealPH = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreIdeal(512, 512, 50.0f, true);  // passe-haut
+
+v2_0::FiltrageFrequenciel<uint8_t> proc(XR_femoral, filtreIdealPH);
+v2_0::FiltrageFrequenciel<uint8_t> proc2(XR_femoral, filtreIdealPB);
+proc.Update();
+proc2.Update();
+v1_1::Image<unsigned char> result = proc.getOutput();
+v1_1::Image<unsigned char> result2 = proc2.getOutput();
+result.sauvegarderPGM("image_filtrée_idéal.pgm");
+result2.sauvegarderPGM("image_filtrée_idéal2.pgm");
+
+
+v1_1::Image<uint8_t> contours = v2_0::GradientMagnitude<uint8_t>::detecterContoursSobel(result2);
+
+contours.sauvegarderPGM("image_contours_sobel.pgm");
 
 break; 
 }

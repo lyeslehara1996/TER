@@ -617,14 +617,14 @@ Addition<T>::addition(img1, img2)
 
     // Addition avec un scalaire
     template<typename T>
-    class AdditionScalar : public Processing1<T> {
+    class AdditionScalaire : public Processing1<T> {
     public:
-        AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace = false);
+        AdditionScalaire(v1_1::Image<T>& input, T valScalaire, bool inPlace = false);
 
         void Process() override;
-        static v1_1::Image<T> additionScalar(const v1_1::Image<T>& input, T valScalar);
+        static v1_1::Image<T> additionScalaire(const v1_1::Image<T>& input, T valScalaire);
     private:
-        T valScalar_;
+        T valScalaire_;
     };
 
 
@@ -724,20 +724,20 @@ Addition<T>::addition(img1, img2)
   
       return add.getOutput();
   }
- // AdditionScalar
+ // AdditionScalaire
 template<typename T>
-AdditionScalar<T>::AdditionScalar(v1_1::Image<T>& input, T valScalar, bool inPlace)
-    : Processing1<T>(input, inPlace), valScalar_(valScalar) {}
+AdditionScalaire<T>::AdditionScalaire(v1_1::Image<T>& input, T valScalaire, bool inPlace)
+    : Processing1<T>(input, inPlace), valScalaire_(valScalaire) {}
 
 template<typename T>
-void AdditionScalar<T>::Process() {
+void AdditionScalaire<T>::Process() {
     size_t largeur = this->imageInput_.getlargeur();
     size_t hauteur = this->imageInput_.gethauteur();
     v1_1::Image<T>& imageSortie = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
 
     for (size_t y = 0; y < hauteur; ++y) {
         for (size_t x = 0; x < largeur; ++x) {
-            T val = this->imageInput_(x, y) + valScalar_;
+            T val = this->imageInput_(x, y) + valScalaire_;
 
             // Saturation (valeur maximale selon le type T)
             if (std::numeric_limits<T>::is_integer) {
@@ -748,16 +748,16 @@ void AdditionScalar<T>::Process() {
         }
     }
 }
-    // Fonction libre additionScalar
+    // Fonction libre additionScalaire
     template<typename T>
-   v1_1::Image<T> AdditionScalar<T>::additionScalar(const v1_1::Image<T>& input, T valScalar) {
+   v1_1::Image<T> AdditionScalaire<T>::additionScalaire(const v1_1::Image<T>& input, T valScalaire) {
         size_t largeur = input.getlargeur();
         size_t hauteur = input.gethauteur();
         v1_1::Image<T> output(largeur, hauteur);
 
         for (size_t y = 0; y < hauteur; ++y) {
             for (size_t x = 0; x < largeur; ++x) {
-                output(x, y) = input(x, y) + valScalar;
+                output(x, y) = input(x, y) + valScalaire;
             }
         }
 
@@ -893,6 +893,8 @@ public:
     static v1_1::Image<float> createMoyenneur(int taille);
     static v1_1::Image<float> createGaussien(int taille, float sigma);
     static v1_1::Image<float> createExponentiel(int taille, float lambda);
+    static v1_1::Image<float> createSobelX() ;
+    static v1_1::Image<float> createSobelY();
 
 private:
     v1_1::Image<float> noyau_;
@@ -1004,6 +1006,25 @@ v1_1::Image<float> Convolution<T>::createExponentiel(int taille, float lambda) {
     return noyau;
 }
 
+//sobelX
+template<typename T>
+v1_1::Image<float> Convolution<T>::createSobelX() {
+    v1_1::Image<float> sobelX(3, 3);
+    sobelX(0, 0) = -1; sobelX(1, 0) = 0; sobelX(2, 0) = 1;
+    sobelX(0, 1) = -2; sobelX(1, 1) = 0; sobelX(2, 1) = 2;
+    sobelX(0, 2) = -1; sobelX(1, 2) = 0; sobelX(2, 2) = 1;
+    return sobelX;
+}
+
+template<typename T>
+v1_1::Image<float> Convolution<T>::createSobelY() {
+    v1_1::Image<float> sobelY(3, 3);
+    sobelY(0, 0) = -1; sobelY(1, 0) = -2; sobelY(2, 0) = -1;
+    sobelY(0, 1) = 0;  sobelY(1, 1) = 0;  sobelY(2, 1) = 0;
+    sobelY(0, 2) = 1;  sobelY(1, 2) = 2;  sobelY(2, 2) = 1;
+    return sobelY;
+}
+
 //class 
 
 template<typename T>
@@ -1012,66 +1033,65 @@ public:
     FiltrageFrequenciel(v1_1::Image<T>& image, v1_1::Image<T>& filtre);
     void Process() override;
     static v1_1::Image<T> creerFiltreButterworth(int largeur, int hauteur, float d0, int ordre);
+   static  v1_1::Image<T> creerFiltreIdeal(int largeur, int hauteur, float d0, bool passeHaut);
 };
 
+//Constructeur
 template<typename T>
 FiltrageFrequenciel<T>::FiltrageFrequenciel(v1_1::Image<T>& image, v1_1::Image<T>& filtre)
     : Processing2<T>(image, filtre, false) {}
 
+  
+//methode process 
 template<typename T>
 void FiltrageFrequenciel<T>::Process() {
     size_t w = this->imageInput1_.getlargeur();
     size_t h = this->imageInput1_.gethauteur();
 
-    // 1. Initialiser les parties réelle et imaginaire avec centrage
-    v1_1::Image<T> realIn = this->imageInput1_;
-    v1_1::Image<T> imagIn(w, h);
+    // Utiliser float pour traitement FFT
+    v1_1::Image<float> realInF(w, h), imagInF(w, h);
 
-    for (size_t y = 0; y < h; ++y)
-        for (size_t x = 0; x < w; ++x) {
-            realIn(x, y) *= ((x + y) % 2 == 0) ? 1 : -1;  // centrage
-            imagIn(x, y) = 0;
-        }
-
-    // 2. FFT directe
-    v1_1::Image<T> realF(w, h), imagF(w, h);
-    directFFT(realIn, imagIn, realF, imagF);
-
-    // 3. Appliquer le filtre fréquentiel normalisé
-    for (size_t y = 0; y < h; ++y)
-        for (size_t x = 0; x < w; ++x) {
-            float H = static_cast<float>(this->imageInput2_(x, y)) / 255.0f;  // [0,1]
-            realF(x, y) = static_cast<T>(realF(x, y) * H);
-            imagF(x, y) = static_cast<T>(imagF(x, y) * H);
-        }
-
-    // 4. FFT inverse
-    v1_1::Image<T> realOut(w, h), imagOut(w, h);
-    inverseFFT(realF, imagF, realOut, imagOut);
-
-    // 5. Décentrage de Fourier
+    // Copier l'image d'entrée dans realInF
     for (size_t y = 0; y < h; ++y)
         for (size_t x = 0; x < w; ++x)
-            realOut(x, y) *= ((x + y) % 2 == 0) ? 1 : -1;
+            realInF(x, y) = static_cast<float>(this->imageInput1_(x, y));
 
-    // 6. Stocker le résultat, clamp entre 0 et 255
+    // FFT directe
+    v1_1::Image<float> realF(w, h), imagF(w, h);
+    directFFT(realInF, imagInF, realF, imagF);
+
+    // Appliquer le filtre fréquentiel (normalisé entre 0 et 1)
+    for (size_t y = 0; y < h; ++y)
+        for (size_t x = 0; x < w; ++x) {
+            float H = static_cast<float>(this->imageInput2_(x, y)) / 255.0f;
+            realF(x, y) *= H;
+            imagF(x, y) *= H;
+        }
+
+    // FFT inverse
+    v1_1::Image<float> realOutF(w, h), imagOutF(w, h);
+    inverseFFT(realF, imagF, realOutF, imagOutF);
+
+    // Conversion finale vers le type de sortie (uint8_t, float, etc.)
     this->imageOutput_ = v1_1::Image<T>(w, h);
     for (size_t y = 0; y < h; ++y)
         for (size_t x = 0; x < w; ++x) {
-            float val = static_cast<float>(realOut(x, y));
+            float val = realOutF(x, y);
             val = std::max(0.0f, std::min(255.0f, val));
             this->imageOutput_(x, y) = static_cast<T>(val);
         }
 }
 
-template<typename T>
-v1_1::Image<T> FiltrageFrequenciel<T>::creerFiltreButterworth(int width, int height, float d0, int ordre) {
-    v1_1::Image<T> filtre(width, height);
-    int cx = width / 2;
-    int cy = height / 2;
 
-    for (int y = 0; y < height; ++y)
-        for (int x = 0; x < width; ++x) {
+    
+template<typename T>
+v1_1::Image<T> FiltrageFrequenciel<T>::creerFiltreButterworth(int largeur, int hauteur, float d0, int ordre) {
+    v1_1::Image<T> filtre(largeur, hauteur);
+    int cx = largeur / 2;
+    int cy = hauteur / 2;
+
+    for (int y = 0; y < hauteur; ++y)
+        for (int x = 0; x < largeur; ++x) {
             float dx = x - cx;
             float dy = y - cy;
             float d = std::sqrt(dx * dx + dy * dy);
@@ -1082,6 +1102,91 @@ v1_1::Image<T> FiltrageFrequenciel<T>::creerFiltreButterworth(int width, int hei
     return filtre;
 }
     
+template<typename T>
+v1_1::Image<T> FiltrageFrequenciel<T>::creerFiltreIdeal(int largeur, int hauteur, float d0, bool passeHaut) {
+    v1_1::Image<T> filtre(largeur, hauteur);
+    int cx = largeur / 2;
+    int cy = hauteur / 2;
+
+    for (int y = 0; y < hauteur; ++y) {
+        for (int x = 0; x < largeur; ++x) {
+            float dx = x - cx;
+            float dy = y - cy;
+            float d = std::sqrt(dx * dx + dy * dy);
+
+            float H = (passeHaut) ? ((d >= d0) ? 1.0f : 0.0f)
+                                  : ((d <= d0) ? 1.0f : 0.0f);
+
+            filtre(x, y) = static_cast<T>(H * 255.0f);  // Échelle [0,255]
+        }
+    }
+
+    return filtre;
+}
+
+
+//Detection de contour avec sobel :
+
+template<typename T>
+class GradientMagnitude : public Processing2<T> {
+public:
+    GradientMagnitude(v1_1::Image<T>& gradX, v1_1::Image<T>& gradY, bool inPlace = false);
+
+    void Process() override ;
+
+    /// Méthode statique pour calculer les contours Sobel
+    static v1_1::Image<T> detecterContoursSobel(v1_1::Image<T>& input) ;
+};
+
+
+template<typename T>
+GradientMagnitude<T>::GradientMagnitude(v1_1::Image<T>& gradX, v1_1::Image<T>& gradY, bool inPlace)
+: Processing2<T>(gradX, gradY, inPlace) {}
+
+template<typename T>
+void GradientMagnitude<T>::Process()  {
+size_t w = this->imageInput1_.getlargeur();
+size_t h = this->imageInput1_.gethauteur();
+
+v1_1::Image<T>& output = this->inPlace_ ? this->imageInput1_ : this->imageOutput_;
+output = v1_1::Image<T>(w, h);
+
+for (size_t y = 0; y < h; ++y) {
+    for (size_t x = 0; x < w; ++x) {
+        float gx = static_cast<float>(this->imageInput1_(x, y));
+        float gy = static_cast<float>(this->imageInput2_(x, y));
+        float norm = std::sqrt(gx * gx + gy * gy);
+
+        if (std::numeric_limits<T>::is_integer)
+            norm = std::min<float>(norm, std::numeric_limits<T>::max());
+
+        output(x, y) = static_cast<T>(norm);
+    }
+}
+}
+
+/// Méthode statique pour calculer les contours Sobel
+
+template<typename T>
+v1_1::Image<T> GradientMagnitude<T>::detecterContoursSobel(v1_1::Image<T>& input) {
+    auto sobelX = Convolution<T>::createSobelX();
+    auto sobelY = Convolution<T>::createSobelY();
+
+    Convolution<T> convX(input, sobelX, true);
+    convX.Update();
+    v1_1::Image<T> gx = convX.getOutput();
+
+    Convolution<T> convY(input, sobelY, true);
+    convY.Update();
+    v1_1::Image<T> gy = convY.getOutput();
+
+    GradientMagnitude<T> gradMag(gx, gy, false);
+    gradMag.Update();
+
+    return gradMag.getOutput();
+}
+
+
 
 }
 #endif
