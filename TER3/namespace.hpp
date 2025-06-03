@@ -77,7 +77,7 @@ namespace v1_0 {
    
     template <typename T>
     std::vector<T> RGBImage(size_t largeur, size_t hauteur, T R, T G, T B) {
-        static_assert(std::is_integral<T>::value, "createRGBImage requiert un type entier");
+        static_assert(std::is_integral<T>::value, "creerRGBImage requiert un type entier");
     
         std::vector<T> imageRGB(largeur * hauteur * 3);
         for (size_t i = 0; i < largeur * hauteur; ++i) {
@@ -890,11 +890,11 @@ public:
 
     void Process() override;
 
-    static v1_1::Image<float> createMoyenneur(int taille);
-    static v1_1::Image<float> createGaussien(int taille, float sigma);
-    static v1_1::Image<float> createExponentiel(int taille, float lambda);
-    static v1_1::Image<float> createSobelX() ;
-    static v1_1::Image<float> createSobelY();
+    static v1_1::Image<float> creerMoyenneur(int taille);
+    static v1_1::Image<float> creerGaussien(int taille, float sigma);
+    static v1_1::Image<float> creerExponentiel(int taille, float lambda);
+    static v1_1::Image<float> creerSobelX() ;
+    static v1_1::Image<float> creerSobelY();
 
 private:
     v1_1::Image<float> noyau_;
@@ -949,7 +949,7 @@ void Convolution<T>::Process() {
 
 //Moyenneur
 template<typename T>
-v1_1::Image<float> Convolution<T>::createMoyenneur(int taille) {
+v1_1::Image<float> Convolution<T>::creerMoyenneur(int taille) {
     v1_1::Image<float> noyau(taille, taille);
     float val = 1.0f / (taille * taille);
     for (int y = 0; y < taille; ++y)
@@ -960,7 +960,7 @@ v1_1::Image<float> Convolution<T>::createMoyenneur(int taille) {
 
 //Gaussien 
 template<typename T>
-v1_1::Image<float> Convolution<T>::createGaussien(int taille, float sigma) {
+v1_1::Image<float> Convolution<T>::creerGaussien(int taille, float sigma) {
     v1_1::Image<float> noyau(taille, taille);
     int c = taille / 2;
     float sum = 0.0f;
@@ -984,7 +984,7 @@ v1_1::Image<float> Convolution<T>::createGaussien(int taille, float sigma) {
 //Exponentiel 
 
 template<typename T>
-v1_1::Image<float> Convolution<T>::createExponentiel(int taille, float lambda) {
+v1_1::Image<float> Convolution<T>::creerExponentiel(int taille, float lambda) {
     v1_1::Image<float> noyau(taille, taille);
     int c = taille / 2;
     float sum = 0.0f;
@@ -1008,7 +1008,7 @@ v1_1::Image<float> Convolution<T>::createExponentiel(int taille, float lambda) {
 
 //sobelX
 template<typename T>
-v1_1::Image<float> Convolution<T>::createSobelX() {
+v1_1::Image<float> Convolution<T>::creerSobelX() {
     v1_1::Image<float> sobelX(3, 3);
     sobelX(0, 0) = -1; sobelX(1, 0) = 0; sobelX(2, 0) = 1;
     sobelX(0, 1) = -2; sobelX(1, 1) = 0; sobelX(2, 1) = 2;
@@ -1017,7 +1017,7 @@ v1_1::Image<float> Convolution<T>::createSobelX() {
 }
 
 template<typename T>
-v1_1::Image<float> Convolution<T>::createSobelY() {
+v1_1::Image<float> Convolution<T>::creerSobelY() {
     v1_1::Image<float> sobelY(3, 3);
     sobelY(0, 0) = -1; sobelY(1, 0) = -2; sobelY(2, 0) = -1;
     sobelY(0, 1) = 0;  sobelY(1, 1) = 0;  sobelY(2, 1) = 0;
@@ -1169,8 +1169,8 @@ for (size_t y = 0; y < h; ++y) {
 
 template<typename T>
 v1_1::Image<T> GradientMagnitude<T>::detecterContoursSobel(v1_1::Image<T>& input) {
-    auto sobelX = Convolution<T>::createSobelX();
-    auto sobelY = Convolution<T>::createSobelY();
+    auto sobelX = Convolution<T>::creerSobelX();
+    auto sobelY = Convolution<T>::creerSobelY();
 
     Convolution<T> convX(input, sobelX, true);
     convX.Update();

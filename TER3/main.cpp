@@ -371,9 +371,9 @@ v1_1::Image<uint8_t> IRM_coeurMoyenneurGaussien = IRM_coeur;
 v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = IRM_coeur;
 
 
-auto moyenneur = v2_0::Convolution<uint8_t>::createMoyenneur(10);
-auto gaussien = v2_0::Convolution<uint8_t>::createGaussien(16, 1.0f);
-auto expo =v2_0:: Convolution<uint8_t>::createExponentiel(5, 0.8f);
+auto moyenneur = v2_0::Convolution<uint8_t>::creerMoyenneur(10);
+auto gaussien = v2_0::Convolution<uint8_t>::creerGaussien(16, 1.0f);
+auto expo =v2_0:: Convolution<uint8_t>::creerExponentiel(5, 0.8f);
 
 
 v2_0::Convolution<uint8_t> filtreMoyenneur(IRM_coeurMoyenneur, moyenneur, false);
