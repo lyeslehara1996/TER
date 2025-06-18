@@ -11,15 +11,10 @@ assert() => assert() affiche une erreur puis appelle abort() et le programme sâ€
 #include<iostream>
 #include<math.h>
 #include <cassert>
-bool premier(int val){
-
-    if (val <= 1) {
-        return false; 
-    }
-    for (int i = 2; i <= sqrt(val); i++) {
-        if (val % i == 0) {
-            return false;  
-        }
+bool premier(int val) {
+    if (val <= 1) return false;
+    for (int i = 2; i * i <= val; i++) {
+        if (val % i == 0) return false;
     }
     return true;
 }

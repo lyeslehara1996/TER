@@ -372,7 +372,7 @@ v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = IRM_coeur;
 
 
 auto moyenneur = v2_0::Convolution<uint8_t>::creerMoyenneur(10);
-auto gaussien = v2_0::Convolution<uint8_t>::creerGaussien(16, 1.0f);
+auto gaussien = v2_0::Convolution<uint8_t>::creerGaussien(3, 1.0f);
 auto expo =v2_0:: Convolution<uint8_t>::creerExponentiel(5, 0.8f);
 
 
@@ -391,6 +391,36 @@ auto outputImage2 = filtreExpo.getOutput();
 output.sauvegarderPGM("image_filtrée_gaussien.pgm");
 outputImage.sauvegarderPGM("image_filtrée_moyeneur.pgm");
 outputImage2.sauvegarderPGM("image_filtrée_expo.pgm");
+
+v1_1::Image<uint8_t> imageEgalisée2Moyenneur = imageEgalisée2;
+v1_1::Image<uint8_t> imageEgalisée2Gaussien = imageEgalisée2;
+v1_1::Image<uint8_t> imageEgalisée2Expo = imageEgalisée2;
+
+//Il applique le même poids à tous les pixels du noyau. Il fait une moyenne simple.
+auto moyenneur2 = v2_0::Convolution<uint8_t>::creerMoyenneur(5);
+//Petit sigma (ex : σ = 0.5) : flou léger, presque pas visible.
+//Grand sigma (ex : σ = 2.0 ou plus) : flou plus fort, l’image devient plus floue, les détails disparaissent.
+auto gaussien2 = v2_0::Convolution<uint8_t>::creerGaussien(5, 1.0f);
+//Petit lambda (ex : λ = 0.2) : noyau large, donc flou plus fort (mais un peu moins doux que gaussien).
+//noyau très concentré → flou très léger, presque comme un filtre moyen 3x3.
+auto expo2 =v2_0:: Convolution<uint8_t>::creerExponentiel(5, 0.8f);
+
+
+v2_0::Convolution<uint8_t> filtreMoyenneur2(imageEgalisée2Moyenneur, moyenneur, false);
+v2_0::Convolution<uint8_t> filtreGaussien2(imageEgalisée2Gaussien, gaussien, false);
+v2_0::Convolution<uint8_t> filtreExpo2(imageEgalisée2Expo, expo, false);
+
+filtreGaussien2.Process();
+filtreMoyenneur2.Process();
+filtreExpo2.Process();
+
+auto output2 = filtreGaussien2.getOutput();
+auto outputImage22 = filtreMoyenneur2.getOutput();
+auto outputImage32 = filtreExpo2.getOutput();
+
+output2.sauvegarderPGM("imageEgalisée2Moyenneur.pgm");
+outputImage22.sauvegarderPGM("imageEgalisée2Gaussien.pgm");
+outputImage32.sauvegarderPGM("imageEgalisée2Expo.pgm");
 
 // Créer l'image et le filtre
 

@@ -220,6 +220,23 @@ std::vector<uint8_t> applLUT(const std::vector<uint8_t>& imageGris, const std::v
 template<typename SrcType, typename DstType>
 std::vector<DstType> convertImage(const std::vector<SrcType>& image, bool adjustDynamics) { //On va ré-étaler la plage de valeurs de l’image source pour utiliser toute la plage possible de la destination.
                                                                                             //prends toute la plage utile des valeurs en uint16_t et on les "étales" sur toute la plage disponible en uint8_t (de 0 à 255)
+                                                                                                        /*
+                                                                                                      //Exemple :
+                                                                                                        Si les valeurs de l’image sont entre 10000 et 20000, alors :
+
+                                                                                                        minVal = 10000
+
+                                                                                                        maxVal = 20000
+
+                                                                                                        Un pixel ayant la valeur :
+
+                                                                                                        10000 devient → (10000 - 10000)/(20000 - 10000) * 255 = 0
+
+                                                                                                        15000 devient → (15000 - 10000)/(10000) * 255 = 127.5 → ~128
+
+                                                                                                        20000 devient → 255
+                                                                                                        */ 
+
     std::vector<DstType> imageCnvert(image.size());
 
     SrcType minVal = *std::min_element(image.begin(), image.end());
@@ -644,7 +661,6 @@ namespace v2_0 {
         }
     }
     
-    
         template<typename T>
     void egalisationHistogram<T>::Process() {
         static_assert(std::is_same<T, uint8_t>::value, "egalisation d'Histogram ne supporte que uint8_t");
@@ -657,14 +673,11 @@ namespace v2_0 {
         output = v1_1::Image<T>(w, h);
     
         // 1. Histogramme d'entrée
-  
         histogramImage_ = std::vector<int>(256, 0);
         for (auto val : this->imageInput_.getData()) {
             histogramImage_[val]++;
         }
-    
         // 2. CDF
-  
         std::vector<int> cdf(256);
         cdf[0] = histogramImage_[0];
         for (int i = 1; i < 256; ++i)
@@ -674,7 +687,7 @@ namespace v2_0 {
         std::vector<uint8_t> lut(256);
         for (int i = 0; i < 256; ++i)
             lut[i] = static_cast<uint8_t>(255.0 * cdf[i] / total);
-    
+
         // 4. Appliquer LUT
         for (size_t y = 0; y < h; ++y)
             for (size_t x = 0; x < w; ++x)
