@@ -370,7 +370,16 @@ v1_1::Image<uint8_t> IRM_coeurMoyenneur = IRM_coeur;
 v1_1::Image<uint8_t> IRM_coeurMoyenneurGaussien = IRM_coeur;
 v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = IRM_coeur;
 
+/*
+Pour un petit noyau (ex : 3×3), choisis λ ou σ petits car tu n’as pas beaucoup de voisins.
+Pour un noyau plus grand (5×5, 7×7, 11×11…), choisis λ ou σ un peu plus grands pour que l’effet se ressente sur la taille du noyau.
+En général :
 
+𝜎≈taille du noyau/6
+Pour l'exponentiel, on peut prendre :
+𝜆≈3/(taille du noyau/2)
+
+*/
 auto moyenneur = v2_0::Convolution<uint8_t>::creerMoyenneur(10);
 auto gaussien = v2_0::Convolution<uint8_t>::creerGaussien(3, 1.0f);
 auto expo =v2_0:: Convolution<uint8_t>::creerExponentiel(5, 0.8f);
@@ -400,10 +409,10 @@ v1_1::Image<uint8_t> imageEgalisée2Expo = imageEgalisée2;
 auto moyenneur2 = v2_0::Convolution<uint8_t>::creerMoyenneur(5);
 //Petit sigma (ex : σ = 0.5) : flou léger, presque pas visible.
 //Grand sigma (ex : σ = 2.0 ou plus) : flou plus fort, l’image devient plus floue, les détails disparaissent.
-auto gaussien2 = v2_0::Convolution<uint8_t>::creerGaussien(5, 1.0f);
+auto gaussien2 = v2_0::Convolution<uint8_t>::creerGaussien(7, 0.5f);
 //Petit lambda (ex : λ = 0.2) : noyau large, donc flou plus fort (mais un peu moins doux que gaussien).
 //noyau très concentré → flou très léger, presque comme un filtre moyen 3x3.
-auto expo2 =v2_0:: Convolution<uint8_t>::creerExponentiel(5, 0.8f);
+auto expo2 =v2_0:: Convolution<uint8_t>::creerExponentiel(3, 0.8f);
 
 
 v2_0::Convolution<uint8_t> filtreMoyenneur2(imageEgalisée2Moyenneur, moyenneur, false);
@@ -424,32 +433,32 @@ outputImage32.sauvegarderPGM("imageEgalisée2Expo.pgm");
 
 // Créer l'image et le filtre
 
-   // Créer un filtre Butterworth
-    auto filtre = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreButterworth(XR_femoral.getlargeur(), XR_femoral.gethauteur(), 50.0f, 2);
+//    // Créer un filtre Butterworth
+//     auto filtre = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreButterworth(XR_femoral.getlargeur(), XR_femoral.gethauteur(), 50.0f, 2);
 
-   v2_0::FiltrageFrequenciel<unsigned char> filtreur(XR_femoral, filtre);
-   filtreur.Update();
+//    v2_0::FiltrageFrequenciel<unsigned char> filtreur(XR_femoral, filtre);
+//    filtreur.Update();
    
-   v1_1::Image<unsigned char> resultat = filtreur.getOutput();
-   resultat.sauvegarderPGM("image_filtrée.pgm");
+//    v1_1::Image<unsigned char> resultat = filtreur.getOutput();
+//    resultat.sauvegarderPGM("image_filtrée.pgm");
 
 
-auto filtreIdealPB =v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreIdeal(512, 512, 50.0f, false); // passe-bas
-auto filtreIdealPH = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreIdeal(512, 512, 50.0f, true);  // passe-haut
+// auto filtreIdealPB =v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreIdeal(512, 512, 50.0f, false); // passe-bas
+// auto filtreIdealPH = v2_0::FiltrageFrequenciel<uint8_t>::creerFiltreIdeal(512, 512, 50.0f, true);  // passe-haut
 
-v2_0::FiltrageFrequenciel<uint8_t> proc(XR_femoral, filtreIdealPH);
-v2_0::FiltrageFrequenciel<uint8_t> proc2(XR_femoral, filtreIdealPB);
-proc.Update();
-proc2.Update();
-v1_1::Image<unsigned char> result = proc.getOutput();
-v1_1::Image<unsigned char> result2 = proc2.getOutput();
-result.sauvegarderPGM("image_filtrée_idéal.pgm");
-result2.sauvegarderPGM("image_filtrée_idéal2.pgm");
+// v2_0::FiltrageFrequenciel<uint8_t> proc(XR_femoral, filtreIdealPH);
+// v2_0::FiltrageFrequenciel<uint8_t> proc2(XR_femoral, filtreIdealPB);
+// proc.Update();
+// proc2.Update();
+// v1_1::Image<unsigned char> result = proc.getOutput();
+// v1_1::Image<unsigned char> result2 = proc2.getOutput();
+// result.sauvegarderPGM("image_filtrée_idéal.pgm");
+// result2.sauvegarderPGM("image_filtrée_idéal2.pgm");
 
 
-v1_1::Image<uint8_t> contours = v2_0::GradientMagnitude<uint8_t>::detecterContoursSobel(result2);
+// v1_1::Image<uint8_t> contours = v2_0::GradientMagnitude<uint8_t>::detecterContoursSobel(result2);
 
-contours.sauvegarderPGM("image_contours_sobel.pgm");
+// contours.sauvegarderPGM("image_contours_sobel.pgm");
 
 break; 
 }

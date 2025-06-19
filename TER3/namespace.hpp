@@ -807,18 +807,24 @@ void egalisationHistogram<T>::compterHistogram(const v1_1::Image<T>& image) {
 
     template<typename T>
 void egalisationHistogram<T>::Process() {
+
+    //Vérifie à la compilation que le type T est bien uint8_t (entier sur 8 bits), sinon une erreur de compilation est générée.
+
     static_assert(std::is_same<T, uint8_t>::value, "egalisation d'Histogram ne supporte que uint8_t");
 
+    //Récupère les dimensions de l’image (w = largeur, h = hauteur), et calcule le nombre total de pixels.
     size_t w = this->imageInput_.getlargeur();
     size_t h = this->imageInput_.gethauteur();
     size_t total = w * h;
 
+    //Crée une nouvelle image output : soit en mode in-place (modifie l’image d’entrée),soit sur une image de sortie. Ensuite, cette image est initialisée à la taille de l’image d’entrée.
     v1_1::Image<T>& output = this->inPlace_ ? this->imageInput_ : this->imageOutput_;
     output = v1_1::Image<T>(w, h);
 
     // 1. Histogramme d'entrée
         // 1. Histogramme
     //te donne combien de fois chaque intensité apparaît dans l’image.
+    //Initialise un vecteur de 256 cases  puis compte le nombre d’occurrences de chaque niveau de gris dans l’image d’entrée.
     histogramImage_ = std::vector<int>(256, 0);
     for (auto val : this->imageInput_.getData()) {
         histogramImage_[val]++;
@@ -831,6 +837,8 @@ void egalisationHistogram<T>::Process() {
     std::vector<int> cdf(256);
     cdf[0] = histogramImage_[0];
     for (int i = 1; i < 256; ++i)
+    // Cela donne, pour chaque niveau de gris, le nombre total de pixels ayant une intensité 
+    //La CDF est essentielle pour redistribuer les niveaux d’intensité de manière uniforme.
         cdf[i] = cdf[i - 1] + histogramImage_[i];
 
     // 3. LUT
@@ -908,10 +916,15 @@ Convolution<T>::Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& no
 // Processus de convolution
 template<typename T>
 void Convolution<T>::Process() {
+    //Récupère la largeur (L) et la hauteur (H) de l’image d’entrée.
     int L = this->imageInput_.getlargeur();
     int H = this->imageInput_.gethauteur();
+
+    //Récupère les dimensions du noyau de convolution.
     int nL = noyau_.getlargeur();
     int nH = noyau_.gethauteur();
+
+    //Calcule le décalage nécessaire pour centrer le noyau autour du pixel courant.
     int dx = nL / 2;
     int dy = nH / 2;
 
@@ -920,36 +933,39 @@ void Convolution<T>::Process() {
         this->imageOutput_ = v1_1::Image<T>(L, H);  // allouer explicitement
     }
     
+    //Parcourt chaque pixel (x, y) de l’image.
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < L; ++x) {
+           // Initialise la somme pondérée pour ce pixel.
             float sum = 0.0f;
+            //Parcourt chaque poids du noyau (i, j).
             for (int j = 0; j < nH; ++j) {
                 for (int i = 0; i < nL; ++i) {
+                    //Position dans l’image source correspondant à la position (i, j) dans le noyau centré sur (x, y).
                     int ix = x + i - dx;
                     int iy = y + j - dy;
-
-                    // Gestion manuelle des bords (mirroring simple ici)
+                    //Gestion des bords : si ix ou iy sortent de l’image, on réplique la bordure (padding par duplication).
                     if (ix < 0) ix = 0;
                     if (ix >= L) ix = L - 1;
                     if (iy < 0) iy = 0;
                     if (iy >= H) iy = H - 1;
-
+                   // Ajoute à la somme pondérée la valeur du pixel multipliée par le poids du noyau correspondant.
                     sum += this->imageInput_(ix, iy) * noyau_(i, j);
                 }
             }
-
-            // Clamp manuel entre 0 et 255
+           //on limite la valeur du pixel calculé à la plage [0, 255].
             if (sum < 0.0f) sum = 0.0f;
             else if (sum > 255.0f) sum = 255.0f;
 
+            //On écrit la valeur finale dans l’image de sortie (ou entrée si in-place).
             out(x, y) = static_cast<T>(sum);
         }
-    }
-}
+    }}
 
 //Moyenneur
 template<typename T>
 v1_1::Image<float> Convolution<T>::creerMoyenneur(int taille) {
+    //Crée un objet noyau (matrice 2D taille × taille) contenant des float exp 5*5 ou 3*3   
     v1_1::Image<float> noyau(taille, taille);
     float val = 1.0f / (taille * taille);
     for (int y = 0; y < taille; ++y)
@@ -991,21 +1007,22 @@ v1_1::Image<float> Convolution<T>::creerExponentiel(int taille, float lambda) {
 
     for (int y = 0; y < taille; ++y) {
         for (int x = 0; x < taille; ++x) {
-            float dx = std::abs(x - c);
-            float dy = std::abs(y - c);
-            float val = std::exp(-lambda * (dx + dy));
+            float dx = x - c;
+            float dy = y - c;
+            float distance = std::sqrt(dx * dx + dy * dy);  // Distance Euclidienne
+            float val = std::exp(-lambda * distance);       // Formule exponentielle isotrope
             noyau(x, y) = val;
             sum += val;
         }
     }
 
+    // Normalisation
     for (int y = 0; y < taille; ++y)
         for (int x = 0; x < taille; ++x)
             noyau(x, y) /= sum;
 
     return noyau;
 }
-
 //sobelX
 template<typename T>
 v1_1::Image<float> Convolution<T>::creerSobelX() {
