@@ -913,6 +913,10 @@ template<typename T>
 Convolution<T>::Convolution( v1_1::Image<T>& image, const v1_1::Image<float>& noyau, bool inPlace)
     : Processing1<T>(image, inPlace), noyau_(noyau) {}
 
+
+//Implémentation des méthodes de convolution 
+// Constructeur
+//Methode process() pour le calcul de convolution 
 // Processus de convolution
 template<typename T>
 void Convolution<T>::Process() {
@@ -961,6 +965,7 @@ void Convolution<T>::Process() {
             out(x, y) = static_cast<T>(sum);
         }
     }}
+
 
 //Moyenneur
 template<typename T>

@@ -68,7 +68,7 @@ case 1:{
     
     auto sinusImage_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_BE, true);
     v1_0::sauvegarderPGM(sinusImage_BE_converte, Largeur, Hauteur, imagePGM + "sinusImage_BE_converte.pgm");
-    auto sinusImage_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_LE, true);
+    auto sinusImage_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(sinusImage_LE, false);
     v1_0::sauvegarderPGM(sinusImage_LE_converte, Largeur, Hauteur, imagePGM + "sinusImage_LE_converte.pgm");
     
     
@@ -89,8 +89,8 @@ case 1:{
 
     //Covertir en uint8_t
 
-    auto TDM__crane_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(TDM__crane_LE, true);
-    auto TDM__crane_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(TDM__crane_BE, true);
+    auto TDM__crane_LE_converte = v1_0::convertImage<uint16_t, uint8_t>(TDM__crane_LE, false);
+    auto TDM__crane_BE_converte = v1_0::convertImage<uint16_t, uint8_t>(TDM__crane_BE, false);
     v1_0::sauvegarderPGM(TDM__crane_LE_converte, 512, 512, imagePGM + "TDM__crane_LE_converte.pgm");
     v1_0::sauvegarderPGM(TDM__crane_BE_converte, 512, 512, imagePGM + "TDM__crane_BE_converte.pgm");
     
@@ -129,9 +129,9 @@ case 1:{
     v1_0::sauvegarderPPM(imageXR__femoral_RGB_2, 512, 512,  imageRGB+"imageXR__femoral_RGB_2.ppm");
     v1_0::sauvegarderPPM(imageXR__femoral_RGB_3, 512, 512,  imageRGB+"imageXR__femoral_RGB_3.ppm");
 
-    v1_0::sauvegarderPPM(IRM_coeur_RGB_1, 512, 512,  imageRGB+"IRM_coeur_RGB_1.ppm");
-    v1_0::sauvegarderPPM(IRM_coeur_RGB_2, 512, 512,  imageRGB+"IRM_coeur_RGB_2.ppm");
-    v1_0::sauvegarderPPM(IRM_coeur_RGB_3, 512, 512,  imageRGB+"IRM_coeur_RGB_3.ppm");
+    v1_0::sauvegarderPPM(IRM_coeur_RGB_1, 256, 256,  imageRGB+"IRM_coeur_RGB_1.ppm");
+    v1_0::sauvegarderPPM(IRM_coeur_RGB_2, 256, 256,  imageRGB+"IRM_coeur_RGB_2.ppm");
+    v1_0::sauvegarderPPM(IRM_coeur_RGB_3, 256, 256,  imageRGB+"IRM_coeur_RGB_3.ppm");
 
 
     //  // 5. Sauvegarde des images en couleur
@@ -171,7 +171,7 @@ auto TDM_16_bits_BE = v1_1::Image<uint16_t>::lireImageRAW(ImageRaw + "TDM_16_bit
 
 // Conversion 16 bits -> 8 bits : 
 // **On choisit une seule conversion** car uint8_t n'a pas d'endianness
-auto TDM_16_crane_converte = TDM_16_bits_LE.convertirImage<uint8_t>(false);
+auto TDM_16_crane_converte = TDM_16_bits_LE.convertirImage<uint8_t>(true);
 
 // Images RGB 8 bits par composante (pas d’impact endianess normalement, mais méthode attend bool)
 auto IRM_RGB_crane = v1_1::lectureImageRawRGB(ImageRaw + "IRM_RGB_8_bits_256x256_crane.raw", 256, 256, false);
@@ -375,8 +375,8 @@ histoXR_femoralAprés.sauvegarderPGM(imagePGM + "histoXR_femoralAprés.pgm");
 //Convolution 
 
 v1_1::Image<uint8_t> IRM_coeurMoyenneur = IRM_coeur;
-v1_1::Image<uint8_t> IRM_coeurMoyenneurGaussien = IRM_coeur;
-v1_1::Image<uint8_t> IRM_coeurMoyenneurExpo = IRM_coeur;
+v1_1::Image<uint8_t> IRM_coeurGaussien = IRM_coeur;
+v1_1::Image<uint8_t> IRM_coeurExpo = IRM_coeur;
 
 
 auto moyenneur = v2_0::Convolution<uint8_t>::creerMoyenneur(10);
@@ -385,8 +385,8 @@ auto expo =v2_0:: Convolution<uint8_t>::creerExponentiel(5, 0.8f);
 
 
 v2_0::Convolution<uint8_t> filtreMoyenneur(IRM_coeurMoyenneur, moyenneur, false);
-v2_0::Convolution<uint8_t> filtreGaussien(IRM_coeurMoyenneurGaussien, gaussien, false);
-v2_0::Convolution<uint8_t> filtreExpo(IRM_coeurMoyenneurExpo, expo, false);
+v2_0::Convolution<uint8_t> filtreGaussien(IRM_coeurGaussien, gaussien, false);
+v2_0::Convolution<uint8_t> filtreExpo(IRM_coeurExpo, expo, false);
 
 filtreGaussien.Process();
 filtreMoyenneur.Process();
